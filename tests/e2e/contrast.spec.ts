@@ -86,6 +86,59 @@ async function assertInteractiveContrast(page: Page) {
   expect(checked).toBeGreaterThan(0)
 }
 
+async function tokenColor(page: Page, name: string): Promise<string> {
+  return page.evaluate((token) => {
+    const div = document.createElement('div')
+    div.style.color = `var(${token})`
+    document.body.append(div)
+    const color = getComputedStyle(div).color
+    div.remove()
+    return color
+  }, name)
+}
+
+async function tokenBg(page: Page, name: string): Promise<string> {
+  return page.evaluate((token) => {
+    const div = document.createElement('div')
+    div.style.backgroundColor = `var(${token})`
+    document.body.append(div)
+    const color = getComputedStyle(div).backgroundColor
+    div.remove()
+    return color
+  }, name)
+}
+
+for (const scheme of ['light', 'dark'] as const) {
+  test(`Wantap token contrast pairs (${scheme})`, async ({ page }) => {
+    await page.emulateMedia({ colorScheme: scheme })
+    await page.goto('/')
+    await expect(page.locator('body')).toBeVisible()
+
+    const ink2 = await tokenColor(page, '--ink-2')
+    const surface = await tokenBg(page, '--surface')
+    const onAccent = await tokenColor(page, '--on-accent')
+    const accent = await tokenBg(page, '--accent')
+    const lineStrong = await tokenColor(page, '--line-strong')
+    const onSignal = await tokenColor(page, '--on-signal')
+    const signal = await tokenBg(page, '--signal')
+
+    expect(contrastRatio(ink2, surface)!, 'ink-2 on surface').toBeGreaterThanOrEqual(4.5)
+    expect(contrastRatio(onAccent, accent)!, 'on-accent on accent').toBeGreaterThanOrEqual(4.5)
+    expect(contrastRatio(lineStrong, surface)!, 'line-strong on surface').toBeGreaterThanOrEqual(3)
+    expect(contrastRatio(onSignal, signal)!, 'white on signal').toBeGreaterThanOrEqual(4.5)
+
+    if (scheme === 'light') {
+      const accentText = await tokenColor(page, '--accent-text')
+      const bg = await tokenBg(page, '--bg')
+      expect(contrastRatio(accentText, bg)!, 'accent-text on light bg').toBeGreaterThanOrEqual(4.5)
+      expect(
+        contrastRatio(accentText, surface)!,
+        'accent-text on light surface',
+      ).toBeGreaterThanOrEqual(4.5)
+    }
+  })
+}
+
 const routes = ['/plan', '/spending', '/accounts', '/settings'] as const
 
 for (const width of [1440, 390] as const) {

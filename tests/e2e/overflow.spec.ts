@@ -52,23 +52,28 @@ async function assertTabsFullyVisible(page: import('@playwright/test').Page) {
   }
 }
 
-for (const width of [390, 360] as const) {
-  test(`no horizontal overflow at ${width}px`, async ({ page }) => {
-    test.setTimeout(120_000)
-    await page.setViewportSize({ width, height: 800 })
+for (const width of [375, 820, 1280] as const) {
+  for (const scheme of ['light', 'dark'] as const) {
+    test(`no horizontal overflow at ${width}px ${scheme}`, async ({ page }) => {
+      test.setTimeout(120_000)
+      await page.setViewportSize({ width, height: width <= 375 ? 812 : 900 })
+      await page.emulateMedia({ colorScheme: scheme })
 
-    for (const route of routes) {
-      await waitAppReady(page, route)
-      await assertNoHorizontalOverflow(page)
-      if (route !== '/settings') {
+      for (const route of routes) {
+        await waitAppReady(page, route)
+        await assertNoHorizontalOverflow(page)
+        if (width <= 760 && route !== '/settings') {
+          await assertTabsFullyVisible(page)
+        }
+      }
+
+      if (width <= 760) {
+        await waitAppReady(page, '/plan')
+        await page.getByRole('button', { name: 'Transaction' }).click()
+        await expect(page.getByRole('dialog', { name: 'New transaction' })).toBeVisible()
+        await assertNoHorizontalOverflow(page)
         await assertTabsFullyVisible(page)
       }
-    }
-
-    await waitAppReady(page, '/plan')
-    await page.getByRole('button', { name: 'Transaction' }).click()
-    await expect(page.getByRole('dialog', { name: 'New transaction' })).toBeVisible()
-    await assertNoHorizontalOverflow(page)
-    await assertTabsFullyVisible(page)
-  })
+    })
+  }
 }
