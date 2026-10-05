@@ -35,10 +35,19 @@ export default defineConfig({
         reuseExistingServer: true,
         timeout: 180_000,
       }
-    : {
-        command: 'pnpm dev',
-        url: 'http://localhost:5173',
-        reuseExistingServer: true,
-        timeout: 120_000,
-      },
+    : [
+        {
+          command: 'pnpm dev',
+          url: 'http://localhost:5173',
+          reuseExistingServer: true,
+          timeout: 120_000,
+        },
+        {
+          // dist/ is produced by `pnpm verify` before `pnpm test:e2e`
+          command: 'pnpm preview',
+          url: 'http://localhost:4173',
+          reuseExistingServer: true,
+          timeout: 120_000,
+        },
+      ],
 })

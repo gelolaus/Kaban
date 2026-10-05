@@ -10,7 +10,9 @@ const InspectorContext = createContext<InspectorContextValue | null>(null)
 export function InspectorProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<ReactNode | null>(null)
   return (
-    <InspectorContext.Provider value={{ content, setContent }}>{children}</InspectorContext.Provider>
+    <InspectorContext.Provider value={{ content, setContent }}>
+      {children}
+    </InspectorContext.Provider>
   )
 }
 
