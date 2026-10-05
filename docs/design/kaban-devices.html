@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kaban device frames</title>
+<style>
+*{box-sizing:border-box;margin:0}
+body{background:#1b1b1b;color:#cfcfcf;font:13px/1.4 system-ui,sans-serif;padding:20px}
+h1{font-size:15px;font-weight:500;margin-bottom:4px;color:#fff}
+p{margin-bottom:16px;color:#9a9a9a}
+.row{display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap}
+.dev{display:flex;flex-direction:column;gap:6px}
+iframe{border:1px solid #333;border-radius:14px;background:#000;display:block}
+</style>
+</head>
+<body>
+<h1>Kaban device frames</h1>
+<p>Each frame is a real viewport, so the layout reflows at its width. Phone 390 wide, tablet 820 wide, laptop 1280 wide (scroll sideways).</p>
+<div class="row">
+  <div class="dev"><span>Phone · 390 × 800</span><iframe src="kaban-mock.html" width="390" height="800" title="Phone"></iframe></div>
+  <div class="dev"><span>Tablet · 820 × 800</span><iframe src="kaban-mock.html" width="820" height="800" title="Tablet"></iframe></div>
+</div>
+<div class="dev" style="margin-top:24px;overflow:auto"><span>Laptop · 1280 × 760</span><iframe src="kaban-mock.html" width="1280" height="760" title="Laptop"></iframe></div>
+</body>
+</html>
