@@ -1,15 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { computeMonth } from './compute.ts'
-import {
-  assign,
-  card,
-  cash,
-  inflow,
-  normal,
-  payment,
-  snap,
-  spend,
-} from './test-helpers.ts'
+import { assign, card, cash, inflow, normal, payment, snap, spend } from './test-helpers.ts'
 
 const wallet = cash('wallet')
 const cardA = card('cardA')
@@ -26,10 +17,7 @@ function g4Snapshot() {
       spend('sp1', 'wallet', '2026-10-10', 'groc', 350_000),
       spend('sp2', 'cardA', '2026-10-12', 'dine', 120_000),
     ],
-    assignments: [
-      assign('groc', '2026-10', 300_000),
-      assign('dine', '2026-10', 100_000),
-    ],
+    assignments: [assign('groc', '2026-10', 300_000), assign('dine', '2026-10', 100_000)],
   })
 }
 

@@ -49,30 +49,64 @@ function buildRandom(seed: number): BudgetSnapshot {
     const date = `${month}-${day}`
     const roll = rand()
     if (roll < 0.15) {
-      transactions.push(inflow(`i${i}`, pick(rand, ['c1', 'c2']), date, 10_000 + Math.floor(rand() * 200_000)))
+      transactions.push(
+        inflow(`i${i}`, pick(rand, ['c1', 'c2']), date, 10_000 + Math.floor(rand() * 200_000)),
+      )
     } else if (roll < 0.4) {
       transactions.push(
-        spend(`s${i}`, pick(rand, ['c1', 'c2']), date, pick(rand, ['n1', 'n2', 'n3', 'n4', 'n5']), 1_000 + Math.floor(rand() * 50_000)),
+        spend(
+          `s${i}`,
+          pick(rand, ['c1', 'c2']),
+          date,
+          pick(rand, ['n1', 'n2', 'n3', 'n4', 'n5']),
+          1_000 + Math.floor(rand() * 50_000),
+        ),
       )
     } else if (roll < 0.6) {
       transactions.push(
-        spend(`k${i}`, pick(rand, ['k1', 'k2']), date, pick(rand, ['n1', 'n2', 'n3', 'n4', 'n5']), 1_000 + Math.floor(rand() * 50_000)),
+        spend(
+          `k${i}`,
+          pick(rand, ['k1', 'k2']),
+          date,
+          pick(rand, ['n1', 'n2', 'n3', 'n4', 'n5']),
+          1_000 + Math.floor(rand() * 50_000),
+        ),
       )
     } else if (roll < 0.7) {
       transactions.push(
-        refund(`r${i}`, pick(rand, ['c1', 'c2']), date, pick(rand, ['n1', 'n2', 'n3', 'n4', 'n5']), 1_000 + Math.floor(rand() * 20_000)),
+        refund(
+          `r${i}`,
+          pick(rand, ['c1', 'c2']),
+          date,
+          pick(rand, ['n1', 'n2', 'n3', 'n4', 'n5']),
+          1_000 + Math.floor(rand() * 20_000),
+        ),
       )
     } else if (roll < 0.85) {
-      transactions.push(pay(`p${i}`, pick(rand, ['c1', 'c2']), pick(rand, ['k1', 'k2']), date, 1_000 + Math.floor(rand() * 40_000)))
+      transactions.push(
+        pay(
+          `p${i}`,
+          pick(rand, ['c1', 'c2']),
+          pick(rand, ['k1', 'k2']),
+          date,
+          1_000 + Math.floor(rand() * 40_000),
+        ),
+      )
     } else if (roll < 0.92) {
       transactions.push(pay(`t${i}`, 'c1', 'c2', date, 1_000 + Math.floor(rand() * 10_000)))
     } else {
-      transactions.push(plain(`u${i}`, pick(rand, ['k1', 'k2']), date, -1_000 - Math.floor(rand() * 30_000)))
+      transactions.push(
+        plain(`u${i}`, pick(rand, ['k1', 'k2']), date, -1_000 - Math.floor(rand() * 30_000)),
+      )
     }
   }
   for (let i = 0; i < 15; i++) {
     assignments.push(
-      assign(pick(rand, ['n1', 'n2', 'n3', 'n4', 'n5', 'p1', 'p2']), pick(rand, months), Math.floor(rand() * 80_000)),
+      assign(
+        pick(rand, ['n1', 'n2', 'n3', 'n4', 'n5', 'p1', 'p2']),
+        pick(rand, months),
+        Math.floor(rand() * 80_000),
+      ),
     )
   }
   return snap({ accounts, categories, transactions, assignments })
@@ -80,7 +114,20 @@ function buildRandom(seed: number): BudgetSnapshot {
 
 function lastDay(month: string): string {
   const [y, m] = month.split('-').map(Number) as [number, number]
-  const days = [31, y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0) ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
+  const days = [
+    31,
+    y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0) ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ]
   return `${month}-${String(days[m - 1]).padStart(2, '0')}`
 }
 
@@ -100,7 +147,10 @@ test('cash identity across 200 seeds', () => {
         .filter((a) => a.kind === 'cash')
         .reduce((sum, a) => sum + (bals[a.id] ?? 0), 0)
       const availSum = Object.values(view.categories).reduce((s, c) => s + c.available, 0)
-      const creditOver = Object.values(view.categories).reduce((s, c) => s + c.creditOverspending, 0)
+      const creditOver = Object.values(view.categories).reduce(
+        (s, c) => s + c.creditOverspending,
+        0,
+      )
       expect(cashSum, `seed ${seed} month ${m}`).toBe(view.readyToAssign + availSum + creditOver)
 
       for (const c of Object.values(view.categories)) {
@@ -168,7 +218,18 @@ test('a large history stays fast', () => {
     const month = pick(rand, months)
     const date = `${month}-15`
     if (rand() < 0.5) {
-      transactions.push(spend(`s${i}`, 'c1', date, pick(rand, categories.filter((c) => c.kind === 'normal').map((c) => c.id)), 1000))
+      transactions.push(
+        spend(
+          `s${i}`,
+          'c1',
+          date,
+          pick(
+            rand,
+            categories.filter((c) => c.kind === 'normal').map((c) => c.id),
+          ),
+          1000,
+        ),
+      )
     } else {
       transactions.push(inflow(`i${i}`, 'c1', date, 5000))
     }

@@ -27,10 +27,7 @@ function baseG4() {
     accounts: [wallet, cardA, cardB],
     categories: [groc, dine, payA, payB],
     transactions: [inflow('s', 'wallet', '2026-10-05', 1_000_000)],
-    assignments: [
-      assign('groc', '2026-10', 300_000),
-      assign('dine', '2026-10', 100_000),
-    ],
+    assignments: [assign('groc', '2026-10', 300_000), assign('dine', '2026-10', 100_000)],
   })
 }
 
@@ -203,9 +200,9 @@ describe('credit card payment categories', () => {
       assignments: [assign('dine', '2026-10', 100_000)],
     })
     const oct = computeMonth(s, '2026-10')
-    expect(oct.warnings.some((w) => w.code === 'unknown_category' && w.transactionId === 'sp2')).toBe(
-      true,
-    )
+    expect(
+      oct.warnings.some((w) => w.code === 'unknown_category' && w.transactionId === 'sp2'),
+    ).toBe(true)
     expect(oct.categories.dine?.available).toBe(-20_000)
     expect(oct.categories.dine?.creditOverspending).toBe(20_000)
   })

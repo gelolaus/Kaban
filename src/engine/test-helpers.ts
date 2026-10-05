@@ -78,11 +78,7 @@ export function plain(
   return { id, accountId, date, kind: 'uncategorized', amount }
 }
 
-export function assign(
-  categoryId: string,
-  month: MonthKey,
-  delta: number,
-): AssignmentEntry {
+export function assign(categoryId: string, month: MonthKey, delta: number): AssignmentEntry {
   return { categoryId, month, delta }
 }
 

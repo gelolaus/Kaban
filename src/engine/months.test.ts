@@ -1,11 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import {
-  addMonths,
-  compareMonths,
-  isMonthKey,
-  monthOfDate,
-  monthRange,
-} from './months.ts'
+import { addMonths, compareMonths, isMonthKey, monthOfDate, monthRange } from './months.ts'
 
 describe('monthOfDate', () => {
   test('maps month boundaries', () => {
@@ -18,14 +12,7 @@ describe('monthOfDate', () => {
   })
 
   test('rejects invalid dates', () => {
-    for (const bad of [
-      '2026-02-29',
-      '2026-13-01',
-      '2026-10-5',
-      '10/05/2026',
-      '',
-      '2026-04-31',
-    ]) {
+    for (const bad of ['2026-02-29', '2026-13-01', '2026-10-5', '10/05/2026', '', '2026-04-31']) {
       expect(monthOfDate(bad)).toBeNull()
     }
   })
@@ -63,12 +50,7 @@ describe('compareMonths', () => {
 
 describe('monthRange', () => {
   test('inclusive range', () => {
-    expect(monthRange('2026-11', '2027-02')).toEqual([
-      '2026-11',
-      '2026-12',
-      '2027-01',
-      '2027-02',
-    ])
+    expect(monthRange('2026-11', '2027-02')).toEqual(['2026-11', '2026-12', '2027-01', '2027-02'])
   })
 
   test('single month', () => {

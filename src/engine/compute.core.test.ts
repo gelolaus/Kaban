@@ -35,10 +35,7 @@ describe('G2 assigning', () => {
       accounts: [wallet],
       categories: [groc, dine],
       transactions: [inflow('s', 'wallet', '2026-10-05', 1_000_000)],
-      assignments: [
-        assign('groc', '2026-10', 300_000),
-        assign('dine', '2026-10', 100_000),
-      ],
+      assignments: [assign('groc', '2026-10', 300_000), assign('dine', '2026-10', 100_000)],
     })
     const v = computeMonth(s, '2026-10')
     expect(v.readyToAssign).toBe(600_000)
@@ -54,10 +51,7 @@ describe('core month math', () => {
       accounts: [wallet],
       categories: [groc, dine],
       transactions: [inflow('s', 'wallet', '2026-10-05', 1_000_000)],
-      assignments: [
-        assign('groc', '2026-10', 300_000),
-        assign('groc', '2026-10', -50_000),
-      ],
+      assignments: [assign('groc', '2026-10', 300_000), assign('groc', '2026-10', -50_000)],
     })
     expect(computeMonth(s, '2026-10').categories.groc?.assigned).toBe(250_000)
   })
@@ -188,12 +182,12 @@ describe('warnings', () => {
       assignments: [assign('groc', '2026-10', 300_000)],
     })
     const v = computeMonth(s, '2026-10')
-    expect(v.warnings.some((w) => w.code === 'unknown_category' && w.transactionId === 'badCat')).toBe(
-      true,
-    )
-    expect(v.warnings.some((w) => w.code === 'unknown_account' && w.transactionId === 'badAcc')).toBe(
-      true,
-    )
+    expect(
+      v.warnings.some((w) => w.code === 'unknown_category' && w.transactionId === 'badCat'),
+    ).toBe(true)
+    expect(
+      v.warnings.some((w) => w.code === 'unknown_account' && w.transactionId === 'badAcc'),
+    ).toBe(true)
     expect(v.warnings.some((w) => w.code === 'invalid_date' && w.transactionId === 'badDate')).toBe(
       true,
     )

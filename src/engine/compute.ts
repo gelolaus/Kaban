@@ -1,10 +1,4 @@
-import {
-  compareMonths,
-  isMonthKey,
-  monthOfDate,
-  monthRange,
-  type MonthKey,
-} from './months.ts'
+import { compareMonths, isMonthKey, monthOfDate, monthRange, type MonthKey } from './months.ts'
 import type {
   AssignmentEntry,
   BudgetSnapshot,
@@ -81,7 +75,10 @@ function sumAssignedInFuture(
   return total
 }
 
-function summarize(categories: Record<string, CategoryMonth>, assignedInFuture: number): MonthSummary {
+function summarize(
+  categories: Record<string, CategoryMonth>,
+  assignedInFuture: number,
+): MonthSummary {
   let leftOver = 0
   let assigned = 0
   let activity = 0
