@@ -1,6 +1,6 @@
 # Plan 2A: Budget Engine Implementation Plan
 
-> **For Grok in Cursor:** Work through the tasks in order. Each step has a checkbox: tick it only when the step's check is true. Read `AGENTS.md`, the spec, `docs/guidance/modern-web.md` and this plan before starting. Do not run `git add`, `git commit` or `git push`. At every "Commit checkpoint", print the file list and the message, then stop and wait for the owner to commit. If a step's expected output does not match, stop and report the actual output instead of guessing. Every amount is an integer number of centavos.
+> **For Grok in Cursor:** Work through the tasks in order. Do not edit this plan file: keep your progress in the chat (tick steps there). Read `AGENTS.md`, the spec, `docs/guidance/modern-web.md`, `docs/guidance/commit-style.md` and this plan before starting. Do not run `git add`, `git commit` or `git push`. At every "Commit checkpoint", print the file list and a commit message that you write yourself from the actual diff (follow `docs/guidance/commit-style.md`; the plan's message is only a starting point), then stop and wait for the owner to commit. If a step's expected output does not match, stop and report the actual output instead of guessing. Every amount is an integer number of centavos.
 
 **Prerequisite:** Plan 1 Tasks 1 and 2 are done (scaffold, `pnpm verify`, lint guardrails). Plan 2A touches only `src/engine/` and docs, so it can run while the rest of Plan 1 and Plan 0 are in progress.
 

@@ -1,0 +1,24 @@
+{
+  "name": "kaban-storage-sync-spike",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "playwright test"
+  },
+  "dependencies": {
+    "@tursodatabase/sync-wasm": "0.8.1",
+    "ulid": "3.0.2"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/node": "24.12.2",
+    "typescript": "6.0.3",
+    "vite": "8.3.2",
+    "vite-plugin-pwa": "2.0.0",
+    "workbox-build": "7.4.1",
+    "wrangler": "4.147.0"
+  }
+}

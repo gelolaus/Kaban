@@ -1,6 +1,6 @@
 # Plan 0: Storage and Sync Spike Implementation Plan
 
-> **For Grok in Cursor:** Work through the tasks in order. Each step has a checkbox: tick it only when the step's check is true. Read the spec and `docs/guidance/modern-web.md` before starting. Do not run `git add`, `git commit` or `git push`. At every "Commit checkpoint", print the file list and the message, then stop and wait for the owner to commit. If a step's expected output does not match, stop and report the actual output instead of guessing.
+> **For Grok in Cursor:** Work through the tasks in order. Do not edit this plan file: keep your progress in the chat (tick steps there). Read the spec, `docs/guidance/modern-web.md` and `docs/guidance/commit-style.md` before starting. Do not run `git add`, `git commit` or `git push`. At every "Commit checkpoint", print the file list and a commit message that you write yourself from the actual diff (follow `docs/guidance/commit-style.md`; the plan's message is only a starting point), then stop and wait for the owner to commit. If a step's expected output does not match, stop and report the actual output instead of guessing.
 
 **Goal:** Prove or disprove that Turso's browser sync package (`@tursodatabase/sync-wasm`) can be Kaban's local database and sync engine, on the owner's laptop and phone, and record the decision.
 
@@ -25,6 +25,7 @@
 - No real budget data is used. The Turso database is a dedicated test database that is deleted at the end.
 - Self-host everything. No CDN scripts, fonts or icons.
 - Pin the exact versions above. Do not use `^` or `latest`.
+- pnpm 12 refuses to run dependency build scripts unless they are approved. The only approved packages are `esbuild` and `workerd`, approved with `pnpm approve-builds esbuild workerd` (never `--all`). Any other package that asks for approval: stop and ask the owner.
 - Commit messages follow Conventional Commits: `type(scope): lowercase imperative subject` and terse `- add ...` bullets. Scope for this plan: `spike`, or `docs` for the decision record.
 
 ## Review Focus
@@ -93,9 +94,9 @@ All files are under `spikes/storage-sync/` unless noted.
   (`open`, `addLedger` and the rest are implemented in Tasks 2 and 3. In this task `main.ts` installs only `probe` and `persist`; the other members are stubs that throw `Error('not implemented')` so the file type-checks.)
 - Produces: `probeEnvironment(): Promise<EnvReport>` and `requestPersistence(): Promise<boolean>` in `src/probe.ts`.
 
-- [ ] **Step 1: Scaffold the package.** Create the files with exactly these pinned dependencies. `dependencies`: `@tursodatabase/sync-wasm` 0.8.1, `ulid` 3.0.2. `devDependencies`: `vite` 8.3.2, `typescript` 6.0.3, `@types/node` 24.12.2, `@playwright/test` 1.63.0, `vite-plugin-pwa` 2.0.0, `workbox-build` 7.4.1, `wrangler` 4.147.0. Scripts: `dev` (`vite`), `build` (`tsc --noEmit && vite build`), `preview` (`vite preview`), `test` (`playwright test`). `tsconfig.json`: strict, `noUncheckedIndexedAccess`, `target ES2023`, `module ESNext`, `moduleResolution bundler`, `lib ["ES2023","DOM","DOM.Iterable"]`, `types ["vite/client"]`, `noEmit`. `vite.config.ts`: `server` and `preview` on port 5199 with `strictPort`; `optimizeDeps.exclude: ['@tursodatabase/sync-wasm']`; `worker.format: 'es'`; when `process.env.SPIKE_ISOLATE === '1'` add the headers `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` to both `server.headers` and `preview.headers`. `.gitignore`: `node_modules`, `dist`, `test-results`, `playwright-report`, `.env*`.
-- [ ] **Step 2: Install.** Run `pnpm install` in `spikes/storage-sync/`, then `pnpm exec playwright install chromium`. Expected: both finish without errors.
-- [ ] **Step 3: Write the failing test** `tests/probe.spec.ts`:
+- [x] **Step 1: Scaffold the package.** Create the files with exactly these pinned dependencies. `dependencies`: `@tursodatabase/sync-wasm` 0.8.1, `ulid` 3.0.2. `devDependencies`: `vite` 8.3.2, `typescript` 6.0.3, `@types/node` 24.12.2, `@playwright/test` 1.63.0, `vite-plugin-pwa` 2.0.0, `workbox-build` 7.4.1, `wrangler` 4.147.0. Scripts: `dev` (`vite`), `build` (`tsc --noEmit && vite build`), `preview` (`vite preview`), `test` (`playwright test`). `tsconfig.json`: strict, `noUncheckedIndexedAccess`, `target ES2023`, `module ESNext`, `moduleResolution bundler`, `lib ["ES2023","DOM","DOM.Iterable"]`, `types ["vite/client"]`, `noEmit`. `vite.config.ts`: `server` and `preview` on port 5199 with `strictPort`; `optimizeDeps.exclude: ['@tursodatabase/sync-wasm']`; `worker.format: 'es'`; when `process.env.SPIKE_ISOLATE === '1'` add the headers `Cross-Origin-Opener-Policy: same-origin` and `Cross-Origin-Embedder-Policy: require-corp` to both `server.headers` and `preview.headers`. `.gitignore`: `node_modules`, `dist`, `test-results`, `playwright-report`, `.env*`.
+- [x] **Step 2: Install.** Run `pnpm install` in `spikes/storage-sync/`. pnpm 12 blocks dependency build scripts, so it is expected to stop with `ERR_PNPM_IGNORED_BUILDS` naming `esbuild` and `workerd`. Approve exactly those two with `pnpm approve-builds esbuild workerd` (this creates `pnpm-workspace.yaml` containing `allowBuilds` entries for both), then run `pnpm install` again. Expected: exit code 0. Do not use `--all` and do not approve any other package; if a different package is named, stop and ask the owner. Then run `pnpm exec playwright install chromium`. Expected: finishes without errors.
+- [x] **Step 3: Write the failing test** `tests/probe.spec.ts`:
   ```ts
   import { test, expect } from '@playwright/test'
   import type { EnvReport } from '../src/spike-api'
@@ -110,10 +111,10 @@ All files are under `spikes/storage-sync/` unless noted.
     expect(typeof granted).toBe('boolean')
   })
   ```
-- [ ] **Step 4: Run it to see it fail.** Run `pnpm test probe.spec.ts` (configure `playwright.config.ts` with `testDir: 'tests'`, `use.baseURL: 'http://localhost:5199'`, and `webServer: { command: 'pnpm dev', url: 'http://localhost:5199', reuseExistingServer: true }`). Expected: FAIL because `window.spike` is never defined (timeout in `waitForFunction`).
-- [ ] **Step 5: Implement** `probeEnvironment()` and `requestPersistence()` in `src/probe.ts` using `window.isSecureContext`, `crossOriginIsolated`, `'getDirectory' in navigator.storage`, `navigator.storage.persisted()`, `navigator.storage.persist()` and `navigator.storage.estimate()`. Each call is wrapped so an unsupported or throwing API yields `null` or `false` instead of an exception. Implement `src/main.ts` to install `window.spike` with `probe` and `persist` and the stubs.
-- [ ] **Step 6: Run the test.** Run `pnpm test probe.spec.ts`. Expected: PASS (1 passed).
-- [ ] **Step 7: Commit checkpoint.** Files: everything under `spikes/storage-sync/` except `node_modules`, plus `pnpm-lock.yaml`. Message:
+- [x] **Step 4: Run it to see it fail.** Run `pnpm test probe.spec.ts` (configure `playwright.config.ts` with `testDir: 'tests'`, `use.baseURL: 'http://localhost:5199'`, and `webServer: { command: 'pnpm dev', url: 'http://localhost:5199', reuseExistingServer: true }`). Expected: FAIL because `window.spike` is never defined (timeout in `waitForFunction`).
+- [x] **Step 5: Implement** `probeEnvironment()` and `requestPersistence()` in `src/probe.ts` using `window.isSecureContext`, `crossOriginIsolated`, `'getDirectory' in navigator.storage`, `navigator.storage.persisted()`, `navigator.storage.persist()` and `navigator.storage.estimate()`. Each call is wrapped so an unsupported or throwing API yields `null` or `false` instead of an exception. Implement `src/main.ts` to install `window.spike` with `probe` and `persist` and the stubs.
+- [x] **Step 6: Run the test.** Run `pnpm test probe.spec.ts`. Expected: PASS (1 passed).
+- [ ] **Step 7: Commit checkpoint.** Files: everything under `spikes/storage-sync/` except `node_modules`, including `pnpm-lock.yaml` and `pnpm-workspace.yaml`. Message:
   ```
   feat(spike): scaffold storage and sync spike with environment probe
 
