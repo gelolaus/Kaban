@@ -1,14 +1,15 @@
 # Kaban: Master Design Spec
 
 Date: 2026-10-05
-Status: Draft for review
+Status: Approved. Revised the same day: the visual language changed from "Nothing's taste" to the owner's own Wantap language (warm ink, coral, Syne and Plus Jakarta Sans). Sections 2 and 6 and `docs/guidance/modern-web.md` sections 3 and 4 were rewritten for it. Product structure, budget rules, architecture and plans are unchanged.
 
-Kaban is a personal, zero-based budgeting app that reproduces YNAB's full methodology and feature set, minus bank linking. It is built as a local-first installable web app (PWA). Its structure follows YNAB. Its look follows the calm style of Nothing's own apps.
+Kaban is a personal, zero-based budgeting app that reproduces YNAB's full methodology and feature set, minus bank linking. It is built as a local-first installable web app (PWA). Its structure follows YNAB. Its look follows the owner's Wantap design language (wantap.cc): warm near-black, one coral accent, large soft controls.
 
 Companion files:
 - `docs/guidance/modern-web.md`: the modern web rules every UI task must follow (self-contained, written for Grok).
-- `docs/design/kaban-mock.html`: a responsive, interactive visual reference (laptop, tablet, phone). Open it directly in Chrome.
-- `docs/design/kaban-devices.html`: the same mock in phone, tablet and laptop frames.
+- `docs/design/kaban-mock.html`: a responsive, interactive visual reference (laptop, tablet, phone). **Superseded for look:** it still shows the old Nothing styling (black, charcoal, serif, red). Use it only for screen structure and layout. The look is defined in section 6.
+- `docs/design/kaban-devices.html`: the same mock in phone, tablet and laptop frames. Same note.
+- The Wantap source (`C:\Users\gelo\Documents\GitHub\wantap.cc`, or github.com/gelolaus/wantap.cc) is the look reference: `src/app/globals.css` (tokens), `src/components/ui/button.tsx`, `input.tsx`, `card.tsx`, `src/components/layout/dashboard-shell.tsx`, `app-section.tsx`, and `src/fonts/`. It is a look reference only. Do not copy its Tailwind, shadcn or Next.js code.
 
 ## 1. Purpose and success criteria
 
@@ -19,7 +20,7 @@ Companion files:
 2. Kaban's numbers match YNAB's for the same inputs. This is checked by golden tests (section 7).
 3. The app is faster than YNAB to use. Every edit is instant because writes go to the local database first.
 4. It works fully offline on phone and laptop, and the two stay in sync.
-5. It keeps YNAB's structure and has the calm, modern look of Nothing's apps (section 6).
+5. It keeps YNAB's structure and has the clean, warm look of the owner's Wantap language (section 6).
 6. It follows modern web platform practice (`docs/guidance/modern-web.md`), is accessible, and loads no third-party code.
 
 **Audience:** one user, personal use, one budget in PHP. Multi-user and multi-currency are non-goals for now.
@@ -33,12 +34,12 @@ Companion files:
 | Sync engine | Decided by Plan 0 (a spike). Order of preference: Turso Sync, then Evolu, then a custom change log on Supabase. |
 | Architecture | React + TypeScript (strict) + Vite PWA, a pure budget engine, SQLite or IndexedDB storage behind a repository interface. |
 | Styling | Plain CSS with cascade layers, design tokens as custom properties and container queries. No Tailwind (its global reset conflicts with the modern web rules), no CSS-in-JS runtime. |
-| Visual direction | YNAB's structure with Nothing's taste: black canvas, charcoal cards, serif titles, plain sans body text, one red signal. Rejected: dot-matrix fonts, dot-grid backgrounds, uppercase mono labels, rectangular "techno" buttons, spreadsheet hairline look, oversized hero cards. |
+| Visual direction | YNAB's structure in the owner's Wantap language: warm near-black canvas, soft warm cards, Syne headings, Plus Jakarta Sans body, one peach-coral accent, large rounded controls, flat and quiet, plus one red signal for overspending. Replaces the earlier Nothing direction (black, charcoal, serif, red). Rejected: dot-matrix fonts, dot-grid backgrounds, uppercase mono labels, rectangular "techno" buttons, spreadsheet hairline look, glows, gradients and decoration. |
 | Density | Compact by default on laptop (YNAB-like, rows about 36 px). A Comfortable option. Phone always uses touch sizes. |
 | Currency | PHP only. The currency code is stored on the budget so more can be added later. |
 | Theme | Light and dark. Default follows the system. The manual control is two-state: "use system" or "use the opposite", persisted per device. |
-| Status display | Monochrome plus one red signal. Thin solid progress bars. No dot-matrix font or dot bars. |
-| Fonts | Nothing Serif and Geist only. Files self-hosted. Free fallbacks until the user supplies the Nothing Serif files. |
+| Status display | Warm monochrome plus one red signal. Coral is the brand accent (actions, selection, highlight) and is never used to mean a status. Thin solid progress bars. No dot-matrix font or dot bars. |
+| Fonts | Syne (titles, large numbers) and Plus Jakarta Sans (everything else), copied from Wantap's `src/fonts/` and self-hosted. No monospace face. No Nothing fonts, Geist or Newsreader. |
 | Phone navigation | Five tabs like YNAB's mobile app: Home, Plan, Spending, Accounts, Reflect, plus an extended "+ Transaction" button. |
 | Browser support | Chromium-first (current Chrome and Edge on Windows, Chrome on Android). Firefox and Safari best effort. Confirmed by the owner. |
 | Dev workflow | Grok 4.7 High builds in Cursor from written plans. Claude Opus 5.5 reviews and fixes. Conventional Commits throughout. |
@@ -118,61 +119,96 @@ Verification status was checked against the live YNAB app in a throwaway test pl
 
 **Verified UI facts** to reproduce: the category inspector breaks a month into Left Over, Assigned, Cash Spending and Credit Spending. A credit card register shows header chips "Overspending (month)" and "Payment". The category picker shows each category's available balance and supports inline creation of categories and payees, Split, and Payment/Transfer. Month navigation in YNAB stops one month ahead of the current month. YNAB takes about 4 seconds to sync an edit.
 
-## 6. Design system: YNAB structure, Nothing taste
+## 6. Design system: YNAB structure, Wantap language
 
 ### 6.1 Direction
 
-Kaban keeps YNAB's information architecture and workflows, so a YNAB user feels at home. Its visual style follows Nothing's own apps (Nothing X, Gallery, Essential Space, Weather), checked from their Play Store screenshots, and not the nothing.tech marketing site. What carries over: a pure black canvas, soft charcoal cards, serif for titles and large numbers, plain sentence-case sans text, circular and pill controls, and one red signal. What was tried and rejected is listed in section 2.
+Kaban keeps YNAB's information architecture and workflows, so a YNAB user feels at home. Its visual style is the owner's Wantap language (wantap.cc), which the owner finds far cleaner than the earlier Nothing direction. What carries over:
+- A warm near-black canvas (hue about 55, never neutral gray) with soft warm cards.
+- One peach-coral accent, `#E8A87C`. Filled coral controls always carry dark text.
+- Syne for titles and large numbers, Plus Jakarta Sans for everything else.
+- Large, soft, rounded controls: 44 px high by default, 48 px for the main call to action.
+- Spacious sections with a 1px low-contrast border and a mostly opaque card fill.
+- Flat and quiet: no glow, no gradient, no dot grid, no decorative shadow.
+
+Kaban adds one thing Wantap does not have: a red signal for overspending, because a budget needs a status color that cannot be mistaken for the brand accent (section 6.5).
+
+Kaban differs from Wantap in two ways. Wantap's app is dark only; Kaban keeps a light theme and the two-state theme control (section 2). Wantap is a marketing and builder app; Kaban's laptop layout is a dense three-column budget (section 6.6), so Compact density keeps 36 px rows.
 
 ### 6.2 Color tokens
 
-Contrast was measured against WCAG. Text needs 4.5:1. UI components and large text need 3:1.
+Contrast was measured against WCAG (computed from the exact values below). Text needs 4.5:1. UI components and large text need 3:1. Hex values live only in `tokens.css`. The dark values are Wantap's OKLCH tokens converted to sRGB, with the translucent card composited on the canvas.
 
-| Token | Dark | Light |
-|---|---|---|
-| `--bg` | `#000000` | `#F2F2F2` |
-| `--surface` (card) | `#131313` | `#FFFFFF` |
-| `--surface-header` | `#181818` | `#F7F7F7` |
-| `--surface-selected` | `#1E1E1E` | `#EDEDED` |
-| `--control` (chips, secondary buttons) | `#262626` | `#E4E4E4` |
-| `--track` (progress track) | `#2A2A2A` | `#D9D9D9` |
-| `--ink` | `#FFFFFF` | `#000000` |
-| `--ink-2` (secondary text) | `#8F8F8F` | `#6B6B6B` |
-| `--signal` | `#C8102E` | `#C8102E` |
+| Token | Dark | Light | Wantap source or use |
+|---|---|---|---|
+| `--bg` | `#0C0806` | `#FAF6F1` | `oklch(0.14 0.01 55)`. Page canvas. |
+| `--surface` (card) | `#140E0B` | `#FFFDFA` | `oklch(0.18 0.012 55 / 75%)`. Cards and sections. |
+| `--surface-header` | `#1C1612` | `#F5F1EC` | Group header rows, sheet headers. |
+| `--surface-selected` | `#221C18` | `#F1EAE3` | Hover and selected row without the accent. |
+| `--control` (chips, secondary buttons) | `#241E1A` | `#EAE3DC` | `oklch(0.22 0.012 55)` secondary. |
+| `--track` (progress track) | `#332C28` | `#DDD6CF` | Low contrast on purpose. |
+| `--ink` | `#F6F1EB` | `#190F09` | `oklch(0.96 0.01 75)`. Primary text. |
+| `--ink-2` (secondary text) | `#AEA298` | `#61564D` | `oklch(0.72 0.02 65)`. |
+| `--line` (decorative border) | `#25211F` | `#E3DFDA` | White (dark) or ink (light) at 10% over the canvas. Cards and dividers only. |
+| `--line-strong` (control border) | `#7A6F66` | `#8F847A` | Input and chip outlines. 3:1 or better. |
+| `--accent` (fill) | `#E8A87C` | `#E8A87C` | Primary buttons, Ready to Assign pill, active nav pill. |
+| `--on-accent` | `#190F09` | `#190F09` | Text and icons on `--accent`. |
+| `--accent-text` | `#E8A87C` | `#844925` | Coral as text or an icon outside a fill. |
+| `--accent-wash` | `#3A2A1F` | `#FBEEE4` | `--accent` at 18% over `--surface`. Selected row, active nav. |
+| `--signal` | `#C8102E` | `#C8102E` | Overspending only. |
+
+Measured contrast:
+- Dark: `--ink` on `--bg` 17.72, on `--surface` 17.02. `--ink-2` on `--bg` 8.00, on `--surface` 7.69, on `--surface-selected` 6.80, on `--control` 6.62, on `--accent-wash` 5.52. `--on-accent` on `--accent` 9.27. `--accent` on `--surface` 9.41. `--line-strong` on `--surface` 3.93, on `--control` 3.38.
+- Light: `--ink` on `--bg` 17.53. `--ink-2` on `--bg` 6.66, on `--surface` 7.06, on `--surface-selected` 6.00, on `--control` 5.65, on `--accent-wash` 6.28. `--accent-text` on `--bg` 6.58, on `--surface` 6.97, on `--accent-wash` 6.20. `--on-accent` on `--accent` 9.27. `--line-strong` on `--surface` 3.60, on `--bg` 3.40.
+- Signal: white on `--signal` 5.88. `--signal` as text is 3.39 on dark `--bg` and 3.25 on dark `--surface`, so it fails for small text on dark. It is 5.47 on light `--bg`.
 
 Rules:
-- `#777777` must not be used for light-theme secondary text (4.00:1 on `#F2F2F2`, fails).
-- `--signal` is only a fill with white text (5.88:1), a 1px border, or a bar fill. It is never small text on dark (3.57:1 on black, 3.16:1 on the card color).
-- The highlight surface (the Ready to Assign pill and phone banner) is white with black text in dark mode and black with white text in light mode.
-- No gradients, no shadows, no textures, no background patterns. Separation comes from tonal fills and 1px lines.
+- `--accent` as a fill on the light canvas is only 1.89:1 against `--bg`. That is acceptable only because the label inside is 9.27:1 and names the control. Do not use a bare coral shape with no text or icon as the only cue for something. Use `--accent-text` for coral text or icons on light.
+- Never use `--accent` or `--accent-text` for text on a light surface (`--accent` alone is about 1.9:1).
+- `--signal` is only a fill with white text, a 1px border, or a bar fill. It is never small text on dark.
+- Form control outlines use `--line-strong`, not `--line` (a 10% white border is about 1.25:1 and fails 3:1).
+- Coral never means a status. Funded, underfunded, overspent and zero (section 6.5) are warm gray and red only, so a coral pill is always an action or a selection, never a warning or a state.
+- The highlight surface (the Ready to Assign pill and the phone banner) is `--accent` with `--on-accent` text in both themes.
+- No gradients, no glows, no textures, no background patterns, no decorative shadows. Separation comes from tonal fills and 1px lines.
 - Status is never color alone.
 
 ### 6.3 Typography
 
-- Nothing Serif: month title, view titles, inspector title, and the large numbers (Ready to Assign). Light weight. Falls back to Newsreader, then Georgia.
-- Geist: all other text. Money uses tabular numerals. There is no monospace face.
-- Sizes are in `rem`. Compact laptop body text is `0.8125rem` (13 px), Comfortable and phone `0.875rem`. Month and inspector titles about `1.375rem`. The laptop Ready to Assign amount about `1.125rem`. The phone banner amount about `1.875rem`. Phone view titles about `1.75rem`. Form inputs are never smaller than `1rem`.
-- Font files are self-hosted woff2, subset, with metric-matched fallbacks. See `docs/guidance/modern-web.md` section 4.
+- **Syne** (weights 400 to 800, use 600 for titles): month title, view titles, inspector title, the wordmark, and the large numbers (Ready to Assign). Tracking slightly tight.
+- **Plus Jakarta Sans** (weights 200 to 800): all other text. Money uses `font-variant-numeric: tabular-nums` in every table and list so columns align. There is no monospace face.
+- Both are the files from Wantap's `src/fonts/`, copied into the repo and self-hosted as woff2. Nothing is loaded from a CDN. Syne's headings stay out of table cells.
+- Sizes are in `rem`. Compact laptop body text is `0.8125rem` (13 px), Comfortable and phone `0.875rem` to `1rem`. Month and inspector titles about `1.375rem`. View titles on phone about `1.75rem`. Page titles on laptop comfortable about `2rem`. The laptop Ready to Assign amount about `1.125rem`. The phone banner amount about `1.875rem`. Form inputs are never smaller than `1rem`.
+- Font files are self-hosted woff2 with metric-matched fallbacks. See `docs/guidance/modern-web.md` section 4. The peso sign and tabular numerals must be verified (section 11).
 
 ### 6.4 Density and shape
+
+Wantap's radius is `--radius: 0.875rem`, with a scale derived from it: `--radius-xl` about 1.225rem (controls) and `--radius-3xl` about 1.925rem (large sections). Kaban uses the same scale.
 
 | Property | Compact (laptop default) | Comfortable | Phone |
 |---|---|---|---|
 | Row height | 36 px | 52 px | 56 px |
-| Card radius | 10 px | 18 px | 14 px |
-| Card gap | 8 px | 12 px | 10 px |
+| Control height (buttons, inputs, chips) | 36 px | 44 px | 44 px (48 px for the main call to action and inputs) |
+| Control radius | `--radius-xl` | `--radius-xl` | `--radius-xl` |
+| Card radius | `--radius-xl` | `--radius-3xl` | `--radius-3xl` |
+| Card padding | 16 px | 24 px | 20 px |
+| Card gap | 12 px | 24 px | 16 px |
 | Progress bar thickness | 2 px | 4 px | 4 px |
 | Category icon bubble | hidden | shown | shown |
 
 - Density is set with a `data-density` attribute and tokens, stored per device, and changed in Settings. It does not use container style queries.
-- Controls (buttons, chips, filters, month switcher, search) are pills or circles. Containers are rounded cards.
+- Controls (buttons, chips, filters, month switcher, search) are rounded to `--radius-xl` and may be pills or circles. Containers are rounded cards with a 1px `--line` border.
+- Navigation: the laptop sidebar is about 224 px, with a rounded active pill using `--accent-wash` and a coral icon. On phone the five-tab bar is fixed to the bottom with safe-area padding, and the active tab uses `--accent-text`.
+- Touch targets stay at 44 px on `pointer: coarse` whatever the density (modern-web section 5).
 
 ### 6.5 Status display
 
-- **Funded:** a charcoal pill with the amount.
-- **Underfunded:** a 1px outlined pill, a caption ("₱400.00 more needed by the 1st"), and a partly filled thin bar.
-- **Overspent:** a red pill "▲ −₱500.00", a red bar, and a caption ("Overspent: ₱3,500.00 of ₱3,000.00"). The filter chip shows "N overspent" with a small signal dot.
-- **Zero:** a plain gray number.
+Funded, underfunded and zero are warm grays. Overspent is the only red. Coral is never a status.
+
+- **Funded:** a `--control` pill with the amount in `--ink`.
+- **Underfunded:** a 1px `--line-strong` outlined pill, a caption ("₱400.00 more needed by the 1st"), and a partly filled thin bar in `--ink`.
+- **Overspent:** a `--signal` pill with white text "▲ −₱500.00", a `--signal` bar, and a caption ("Overspent: ₱3,500.00 of ₱3,000.00"). The filter chip shows "N overspent" with a small signal dot.
+- **Zero:** a plain `--ink-2` number.
+- **Over-assigned Ready to Assign:** the pill switches from `--accent` to `--signal` with white text and the "▲" marker.
 - Credit card payment categories show "Available for payment" in the group header.
 
 ### 6.6 Laptop layout (1100 px and wider)
@@ -195,7 +231,7 @@ Follows YNAB's mobile app, confirmed from the user's own screenshots and YNAB's 
 - **Spending:** every transaction grouped by date, each with payee, amount, category chip, account name and a cleared, uncleared or reconciled icon.
 - **Accounts:** grouped as Cash, Credit and Loan with a total per group and a balance per account.
 - **Reflect:** cards for Spending breakdown, Income vs. spending (a monochrome bar chart with a text alternative) and Net worth.
-- **Add transaction sheet:** an Outflow, Inflow, Transfer switch; a large serif amount; a grouped details card (payee, category with its remaining balance, account, date defaulting to today); a keypad; a Save button. Target: under five seconds. The money field is a text input with `inputmode="decimal"`.
+- **Add transaction sheet:** an Outflow, Inflow, Transfer switch; a large Syne amount; a grouped details card (payee, category with its remaining balance, account, date defaulting to today); a keypad; a Save button. Target: under five seconds. The money field is a text input with `inputmode="decimal"`.
 
 ### 6.8 Motion and interaction
 
@@ -211,7 +247,7 @@ Follows YNAB's mobile app, confirmed from the user's own screenshots and YNAB's 
 
 ### 6.10 Reference artifacts
 
-`docs/design/kaban-mock.html` (breakpoints at 1100 px and 760 px) shows every screen above. It has working budget math (assign, cover overspending, add a transaction), a theme control, a density control, and a reset. It is a visual reference only. It intentionally breaks several implementation rules, listed in `docs/guidance/modern-web.md` section 12. Match its look and structure, not its code.
+`docs/design/kaban-mock.html` (breakpoints at 1100 px and 760 px) shows every screen above. It has working budget math (assign, cover overspending, add a transaction), a theme control, a density control, and a reset. It is a reference for screen structure and layout only. Its colors, fonts, radii and sizes are the old Nothing look and are superseded by sections 6.1 to 6.5. It also intentionally breaks several implementation rules, listed in `docs/guidance/modern-web.md` section 12. Match its structure, not its look or its code. For the look, use Wantap (section 6.1) and the tokens in section 6.2.
 
 ## 7. Testing and verification
 
@@ -270,7 +306,8 @@ Bank linking or any automatic bank import. Multi-user accounts, sharing and publ
 
 ## 11. Open items
 
-- **Nothing Serif font files:** the owner will supply them. Until then the Newsreader fallback is used.
+- **Wantap fonts:** Syne and Plus Jakarta Sans come from Wantap's `src/fonts/` (licenses in its `ATTRIBUTION.txt`). To verify during the re-skin: the peso sign `₱` and the minus `−` render from these files (otherwise add a self-hosted fallback), and Plus Jakarta Sans gives tabular numerals so money columns align. If Syne digits read badly for large amounts, large amounts use Plus Jakarta Sans bold instead. The agent reports the outcome.
+- **Mock refresh:** `docs/design/kaban-mock.html` and `kaban-devices.html` still show the Nothing look. Either re-skin them to section 6 or retire them once the app itself is the reference.
 - **Turso Sync:** general-availability status and exact browser requirements will be confirmed by Plan 0 against Turso's current documentation.
 - **YNAB rules and features not yet verified:** R6 to R9, Auto-Assign, Reflect, scheduled transactions, splits and reconcile. These are verified per phase.
 - **modern-web-guidance in Cursor (optional):** the project publishes Cursor and Grok plugin packages. If the owner installs it in Cursor, Grok can run the CLI for the full guides. The distilled rules in `docs/guidance/modern-web.md` work without it.

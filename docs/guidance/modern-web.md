@@ -62,28 +62,35 @@ Assumption, to be confirmed by the project owner: Kaban targets current Chrome a
 
 ## 3. Design tokens and verified contrast
 
-Kaban's colors, with measured WCAG contrast. Text needs 4.5:1; large text and UI components need 3:1.
+Kaban's colors follow the owner's Wantap language (warm near-black, one coral accent). The full token table, with every measured contrast ratio, is in `docs/superpowers/specs/2026-10-05-kaban-design.md` section 6.2. That table is the source of truth. Text needs 4.5:1; large text and UI components need 3:1. Summary:
 
 | Token | Dark | Light | Notes |
 |---|---|---|---|
-| `--bg` | `#000000` | `#F2F2F2` | |
-| `--surface` (card) | `#131313` | `#FFFFFF` | |
-| `--surface-header` | `#181818` | `#F7F7F7` | |
-| `--surface-selected` | `#1E1E1E` | `#EDEDED` | |
-| `--ink` | `#FFFFFF` | `#000000` | |
-| `--ink-2` (secondary text) | `#8F8F8F` | `#6B6B6B` | Dark: 5.15 to 6.49:1. Light: 4.55 to 5.33:1. **Do not use `#777777`**; it is 4.00:1 on `#F2F2F2` and fails. |
-| `--signal` | `#C8102E` | `#C8102E` | White text on it is 5.88:1. As text on `#000` it is 3.57:1 and on `#131313` 3.16:1, so **never use signal as small text on dark**. Use it only as a fill with white text, a 1px border, or a bar fill. |
+| `--bg` | `#0C0806` | `#FAF6F1` | Warm canvas, never neutral gray. |
+| `--surface` (card) | `#140E0B` | `#FFFDFA` | |
+| `--surface-header` | `#1C1612` | `#F5F1EC` | |
+| `--surface-selected` | `#221C18` | `#F1EAE3` | |
+| `--control` | `#241E1A` | `#EAE3DC` | Chips, secondary buttons. |
+| `--ink` | `#F6F1EB` | `#190F09` | |
+| `--ink-2` (secondary text) | `#AEA298` | `#61564D` | Dark: 8.00 on `--bg`. Light: 6.66 on `--bg`. |
+| `--line` / `--line-strong` | `#25211F` / `#7A6F66` | `#E3DFDA` / `#8F847A` | `--line` is decorative only (about 1.25:1). Form control outlines use `--line-strong` (3:1 or better). |
+| `--accent` / `--on-accent` | `#E8A87C` / `#190F09` | `#E8A87C` / `#190F09` | Coral fill with dark text (9.27:1). |
+| `--accent-text` | `#E8A87C` | `#844925` | Coral as text or an icon. Never raw `--accent` as text on light (about 1.9:1). |
+| `--accent-wash` | `#3A2A1F` | `#FBEEE4` | Selected row, active nav. |
+| `--signal` | `#C8102E` | `#C8102E` | White text on it is 5.88:1. As text on dark it is 3.25 to 3.39:1, so **never use signal as small text on dark**. Use it only as a fill with white text, a 1px border, or a bar fill. |
 
+- Coral is the brand accent and never means a status. Overspent is the only red. Do not rely on hue to tell coral from red: overspent also shows the "▲" marker and a minus sign.
 - Status is never color alone. Overspent always shows the "▲" marker and a minus sign. Underfunded shows an outline plus a text caption. Funded shows the amount.
-- Progress bar tracks are low contrast on purpose. The filled part (14:1) and the written amount carry the meaning, so the bar is never the only source of information.
+- Progress bar tracks are low contrast on purpose. The filled part and the written amount carry the meaning, so the bar is never the only source of information.
+- No gradients, glows, textures or decorative shadows.
 
 ## 4. Typography and fonts
 
-- Faces: Nothing Serif (page titles, large numbers), Geist (UI and body). No monospace face.
-- Money uses `font-variant-numeric: tabular-nums` so columns align.
-- Self-host all fonts from `public/fonts/` as `woff2`, subset to the characters needed (Latin, digits, the peso sign `₱`, the minus sign `−`, the arrow `▲`). Use `font-display: swap`.
+- Faces: Syne (page titles, large numbers) and Plus Jakarta Sans (UI and body). No monospace face. Both come from Wantap's `src/fonts/` (see its `ATTRIBUTION.txt`).
+- Money uses `font-variant-numeric: tabular-nums` so columns align. Verify that Plus Jakarta Sans provides tabular figures. Keep Syne out of tables and money columns.
+- Self-host all fonts from `public/fonts/` as `woff2`, subset to the characters needed (Latin, digits, the peso sign `₱`, the minus sign `−`). Verify `₱` and `−` render from the file; if not, add a self-hosted fallback face for those glyphs. The arrow `▲` is drawn as an inline SVG, never a text glyph. Use `font-display: swap`.
 - Preload only the one or two fonts above the fold, always with `crossorigin`: `<link rel="preload" href="/fonts/x.woff2" as="font" type="font/woff2" crossorigin>`. Do not preload every face. Do not set `fetchpriority` on fonts.
-- Define fallbacks that match metrics (`size-adjust`, `ascent-override`) so swapping fonts does not shift layout. When the Nothing Serif file is missing, fall back to Newsreader (self-hosted), then `Georgia, serif`.
+- Define fallbacks that match metrics (`size-adjust`, `ascent-override`) so swapping fonts does not shift layout. Fall back to `system-ui, sans-serif` for Plus Jakarta Sans and `system-ui, sans-serif` for Syne.
 - Never use `@import` in CSS.
 - Never use `text-align: justify`. Keep prose to about 80 characters per line.
 
@@ -210,7 +217,7 @@ progress.ring { --value: attr(value type(<number>)); transition: --value 0s;
 
 ## 12. Where the design mock deviates (do not copy these)
 
-`docs/design/kaban-mock.html` is a visual reference only. It was built quickly and intentionally breaks several rules above. Do not copy its code. Specifically it uses: `px` font sizes, inline styles with literal values, a global `*` reset, `innerHTML` templates, `div`s inside `button`s, a non-semantic div-based grid instead of a `<table>`, third-party CDN fonts and icons, a hard-coded `#777` secondary color in the light theme (fails contrast), and a three-state theme control. Match its look and structure, not its implementation.
+`docs/design/kaban-mock.html` is a reference for screen structure only. Its look (black, charcoal, serif, red) is the superseded Nothing direction; use the Wantap tokens in section 3 instead. It was built quickly and intentionally breaks several rules above. Do not copy its code. Specifically it uses: `px` font sizes, inline styles with literal values, a global `*` reset, `innerHTML` templates, `div`s inside `button`s, a non-semantic div-based grid instead of a `<table>`, third-party CDN fonts and icons, the old Nothing colors and fonts, a hard-coded `#777` secondary color in the light theme (fails contrast), and a three-state theme control. Match its structure, not its look or its implementation.
 
 ## 13. Guide IDs (for optional retrieval)
 
