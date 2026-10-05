@@ -1,34 +1,36 @@
 @layer tokens {
   :root {
-    --bg-light: #f2f2f2;
-    --bg-dark: #000000;
-    --surface-light: #ffffff;
-    --surface-dark: #131313;
-    --surface-header-light: #f7f7f7;
-    --surface-header-dark: #181818;
-    --surface-selected-light: #ededed;
-    --surface-selected-dark: #1e1e1e;
-    --control-light: #e4e4e4;
-    --control-dark: #262626;
-    --track-light: #d9d9d9;
-    --track-dark: #2a2a2a;
-    --ink-light: #000000;
-    --ink-dark: #ffffff;
-    --ink-2-light: #6b6b6b;
-    --ink-2-dark: #8f8f8f;
+    --bg-light: #faf6f1;
+    --bg-dark: #0c0806;
+    --surface-light: #fffdfa;
+    --surface-dark: #140e0b;
+    --surface-header-light: #f5f1ec;
+    --surface-header-dark: #1c1612;
+    --surface-selected-light: #f1eae3;
+    --surface-selected-dark: #221c18;
+    --control-light: #eae3dc;
+    --control-dark: #241e1a;
+    --track-light: #ddd6cf;
+    --track-dark: #332c28;
+    --ink-light: #190f09;
+    --ink-dark: #f6f1eb;
+    --ink-2-light: #61564d;
+    --ink-2-dark: #aea298;
+    --line-light: #e3dfda;
+    --line-dark: #25211f;
+    --line-strong-light: #8f847a;
+    --line-strong-dark: #7a6f66;
+    --accent-light: #e8a87c;
+    --accent-dark: #e8a87c;
+    --on-accent-light: #190f09;
+    --on-accent-dark: #190f09;
+    --accent-text-light: #844925;
+    --accent-text-dark: #e8a87c;
+    --accent-wash-light: #fbeee4;
+    --accent-wash-dark: #3a2a1f;
     --signal-light: #c8102e;
     --signal-dark: #c8102e;
     --on-signal: #ffffff;
-    --highlight-bg-light: #000000;
-    --highlight-bg-dark: #ffffff;
-    --highlight-ink-light: #ffffff;
-    --highlight-ink-dark: #000000;
-    --line-light: #e4e4e4;
-    --line-dark: #1c1c1c;
-    --warn-bg-light: #fff1f2;
-    --warn-bg-dark: #1a0a0d;
-    --warn-border-light: #f0b4bc;
-    --warn-border-dark: #5b1621;
 
     --bg: light-dark(var(--bg-light), var(--bg-dark));
     --surface: light-dark(var(--surface-light), var(--surface-dark));
@@ -38,15 +40,17 @@
     --track: light-dark(var(--track-light), var(--track-dark));
     --ink: light-dark(var(--ink-light), var(--ink-dark));
     --ink-2: light-dark(var(--ink-2-light), var(--ink-2-dark));
-    --signal: light-dark(var(--signal-light), var(--signal-dark));
-    --highlight-bg: light-dark(var(--highlight-bg-light), var(--highlight-bg-dark));
-    --highlight-ink: light-dark(var(--highlight-ink-light), var(--highlight-ink-dark));
     --line: light-dark(var(--line-light), var(--line-dark));
-    --warn-bg: light-dark(var(--warn-bg-light), var(--warn-bg-dark));
-    --warn-border: light-dark(var(--warn-border-light), var(--warn-border-dark));
+    --line-strong: light-dark(var(--line-strong-light), var(--line-strong-dark));
+    --accent: light-dark(var(--accent-light), var(--accent-dark));
+    --on-accent: light-dark(var(--on-accent-light), var(--on-accent-dark));
+    --accent-text: light-dark(var(--accent-text-light), var(--accent-text-dark));
+    --accent-wash: light-dark(var(--accent-wash-light), var(--accent-wash-dark));
+    --signal: light-dark(var(--signal-light), var(--signal-dark));
 
-    --font-serif: 'Nothing Serif', 'Newsreader Variable', Georgia, serif;
-    --font-sans: 'Geist Variable', system-ui, sans-serif;
+    --font-display: Syne, 'Syne Fallback', system-ui, sans-serif;
+    --font-sans:
+      'Plus Jakarta Sans', 'Plus Jakarta Sans Fallback', 'Kaban Money Glyphs', system-ui, sans-serif;
     --fs-caption: 0.6875rem;
     --fs-body: 0.8125rem;
     --fs-title: 1.375rem;
@@ -57,20 +61,29 @@
     --space-2: 0.5rem;
     --space-3: 0.75rem;
     --space-4: 1rem;
+    --space-5: 1.25rem;
     --space-6: 1.5rem;
     --space-8: 2rem;
+
+    --radius: 0.875rem;
+    --radius-xl: 1.225rem;
+    --radius-3xl: 1.925rem;
     --radius-pill: 999px;
 
     --row-h: 36px;
-    --card-radius: 10px;
-    --card-gap: 8px;
+    --control-h: 36px;
+    --control-h-cta: 36px;
+    --card-radius: var(--radius-xl);
+    --card-pad: 1rem;
+    --card-gap: 0.75rem;
     --bar-h: 2px;
     --icon-bubble: none;
+    --sidebar-w: 14rem;
 
     --dur-fast: 120ms;
     --dur: 180ms;
     --ease: ease-out;
-    --focus-ring: 2px solid var(--ink);
+    --focus-ring: 2px solid color-mix(in srgb, var(--accent) 55%, transparent);
     --focus-offset: 2px;
 
     color-scheme: light dark;
@@ -79,8 +92,11 @@
   :root[data-density='comfortable'] {
     --fs-body: 0.875rem;
     --row-h: 52px;
-    --card-radius: 18px;
-    --card-gap: 12px;
+    --control-h: 44px;
+    --control-h-cta: 44px;
+    --card-radius: var(--radius-3xl);
+    --card-pad: 1.5rem;
+    --card-gap: 1.5rem;
     --bar-h: 4px;
     --icon-bubble: flex;
   }
@@ -91,8 +107,11 @@
     :root[data-density='comfortable'] {
       --fs-body: 0.875rem;
       --row-h: 56px;
-      --card-radius: 14px;
-      --card-gap: 10px;
+      --control-h: 44px;
+      --control-h-cta: 48px;
+      --card-radius: var(--radius-3xl);
+      --card-pad: 1.25rem;
+      --card-gap: 1rem;
       --bar-h: 4px;
       --icon-bubble: flex;
     }
@@ -108,12 +127,13 @@
       --track: var(--track-dark);
       --ink: var(--ink-dark);
       --ink-2: var(--ink-2-dark);
-      --signal: var(--signal-dark);
-      --highlight-bg: var(--highlight-bg-dark);
-      --highlight-ink: var(--highlight-ink-dark);
       --line: var(--line-dark);
-      --warn-bg: var(--warn-bg-dark);
-      --warn-border: var(--warn-border-dark);
+      --line-strong: var(--line-strong-dark);
+      --accent: var(--accent-dark);
+      --on-accent: var(--on-accent-dark);
+      --accent-text: var(--accent-text-dark);
+      --accent-wash: var(--accent-wash-dark);
+      --signal: var(--signal-dark);
     }
   }
 }

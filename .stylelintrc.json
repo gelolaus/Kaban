@@ -13,7 +13,7 @@
     },
     "color-hex-length": null,
     "custom-property-empty-line-before": null,
-    "value-keyword-case": ["lower", { "ignoreKeywords": ["Georgia"] }],
+    "value-keyword-case": ["lower", { "ignoreKeywords": ["Georgia", "Syne"] }],
     "media-feature-range-notation": null,
     "property-no-deprecated": null
   },
