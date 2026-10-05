@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test'
 
 test.beforeEach(async ({ page }) => {
   await page.goto('/dev/gallery')
+  await expect(page.getByRole('heading', { name: 'Component gallery' })).toBeVisible()
 })
 
 test('money field validates on blur', async ({ page }) => {
@@ -61,6 +62,7 @@ for (const scheme of ['dark', 'light'] as const) {
   test(`axe forms ${scheme}`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: scheme })
     await page.goto('/dev/gallery')
+    await expect(page.getByRole('heading', { name: 'Component gallery' })).toBeVisible()
     const results = await new AxeBuilder({ page }).analyze()
     expect(results.violations).toEqual([])
   })

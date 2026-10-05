@@ -116,6 +116,7 @@ for (const screen of screens) {
       await page.setViewportSize(screen.size)
       await page.emulateMedia({ colorScheme: scheme })
       await page.goto(screen.path)
+      await expect(page.locator('main h1, h1').first()).toBeVisible({ timeout: 60_000 })
       const results = await new AxeBuilder({ page }).analyze()
       expect(results.violations).toEqual([])
     })

@@ -118,6 +118,27 @@ export class BudgetRepository {
     return (await stmt.all(this.budgetId)) as PinRow[]
   }
 
+  async pinCategory(categoryId: string): Promise<void> {
+    const existing = (await this.listPins()).find((p) => p.category_id === categoryId)
+    if (existing) return
+    const ts = now()
+    const id = ulid()
+    const sort = (await this.listPins()).length
+    const ins = await this.db.prepare(
+      `INSERT INTO pins (id, budget_id, category_id, sort_order, created_at, updated_at, deleted_at)
+       VALUES (?, ?, ?, ?, ?, ?, NULL)`,
+    )
+    await ins.run(id, this.budgetId, categoryId, sort, ts, ts)
+  }
+
+  async unpinCategory(categoryId: string): Promise<void> {
+    const ts = now()
+    const soft = await this.db.prepare(
+      `UPDATE pins SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND category_id = ? AND deleted_at IS NULL`,
+    )
+    await soft.run(ts, ts, this.budgetId, categoryId)
+  }
+
   async createAccount(input: {
     name: string
     type: AccountType

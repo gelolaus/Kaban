@@ -8,6 +8,10 @@ export function HomeScreen() {
   const pinned = data?.pins ?? []
   const cats = data?.categories ?? []
 
+  const pinnedCats = pinned
+    .map((p) => cats.find((c) => c.id === p.category_id))
+    .filter((c): c is NonNullable<typeof c> => !!c && !c.hidden)
+
   return (
     <>
       <div className="home-header">
@@ -18,22 +22,18 @@ export function HomeScreen() {
       </div>
       <Card>
         <h2>Pinned</h2>
-        {pinned.length === 0 ? (
-          <p className="ink-2">Pin categories in a later plan. Showing first categories for now.</p>
-        ) : null}
-        <ul className="pin-list">
-          {(pinned.length
-            ? pinned.map((p) => cats.find((c) => c.id === p.category_id)).filter(Boolean)
-            : cats.filter((c) => c.kind === 'normal' && !c.hidden).slice(0, 3)
-          ).map((c) =>
-            c ? (
+        {pinnedCats.length === 0 ? (
+          <p className="ink-2">Pin categories from the Plan inspector to see them here.</p>
+        ) : (
+          <ul className="pin-list">
+            {pinnedCats.map((c) => (
               <li key={c.id}>
                 <span>{c.name}</span>
                 <Amount centavos={view?.categories[c.id]?.available ?? 0} />
               </li>
-            ) : null,
-          )}
-        </ul>
+            ))}
+          </ul>
+        )}
       </Card>
       <Card>
         <h2>Current goal</h2>

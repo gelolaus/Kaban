@@ -104,20 +104,60 @@
     font-weight: 400;
   }
 
+  .plan-tools {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: end;
+  }
+
+  .plan-tools .field {
+    flex: 1 1 8rem;
+    min-inline-size: 8rem;
+  }
+
+  .plan-cat-actions {
+    display: grid;
+    gap: var(--space-2);
+    margin-block-start: var(--space-3);
+  }
+
+  .plan-hide-group {
+    margin-inline-start: var(--space-2);
+    font-size: var(--fs-caption);
+  }
+
   .plan-cat-btn {
     border: 0;
     background: transparent;
     cursor: pointer;
     padding: 0;
     text-align: start;
+    color: inherit;
+    font: inherit;
   }
 
   .plan-row-selected {
     background: var(--surface-selected);
   }
 
-  .plan-inspector-inline {
-    display: none;
+  .plan-breakdown {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-3);
+  }
+
+  .plan-breakdown > div {
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .plan-breakdown dt {
+    color: var(--ink-2);
+  }
+
+  .plan-breakdown dd {
+    margin: 0;
   }
 
   @media (width <= 760px) {
@@ -151,34 +191,8 @@
       display: block;
     }
 
-    .plan-inspector-inline {
-      display: block;
+    .plan-tools {
+      display: none;
     }
-  }
-
-  @media (width >= 1100px) {
-    .plan-inspector-inline {
-      display: block;
-      margin-block-start: var(--space-4);
-    }
-  }
-
-  .plan-breakdown {
-    display: grid;
-    gap: var(--space-2);
-    margin: 0 0 var(--space-3);
-  }
-
-  .plan-breakdown > div {
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .plan-breakdown dt {
-    color: var(--ink-2);
-  }
-
-  .plan-breakdown dd {
-    margin: 0;
   }
 }

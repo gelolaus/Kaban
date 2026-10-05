@@ -1,7 +1,6 @@
 import { useMemo, useState } from 'react'
 import { useBudget } from '../../state/BudgetContext.tsx'
 import { Amount } from '../../ui/components/Amount.tsx'
-import { Button } from '../../ui/components/Button.tsx'
 import { Card } from '../../ui/components/Card.tsx'
 import { Sheet } from '../../ui/components/Sheet.tsx'
 import { TransactionForm } from '../transactions/TransactionForm.tsx'
@@ -83,16 +82,6 @@ export function SpendingScreen() {
               await refresh()
             }}
           />
-        ) : null}
-        {editing ? (
-          <Button
-            onClick={async () => {
-              /* delete handled in form */
-            }}
-            className="visually-hidden"
-          >
-            Placeholder
-          </Button>
         ) : null}
       </Sheet>
 

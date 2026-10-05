@@ -55,6 +55,22 @@
     display: none;
   }
 
+  .shell-tx-desk {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-block-start: auto;
+    padding: var(--space-2);
+    border: 0;
+    border-radius: 0.5rem;
+    background: var(--highlight-bg);
+    color: var(--highlight-ink);
+    font: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: start;
+  }
+
   .skip-link {
     position: absolute;
     inset-inline-start: var(--space-2);
@@ -90,7 +106,8 @@
       align-items: center;
     }
 
-    .shell-nav {
+    .shell-nav,
+    .shell-tx-desk {
       justify-content: center;
     }
   }
@@ -102,7 +119,8 @@
     }
 
     .shell-side,
-    .shell-inspector {
+    .shell-inspector,
+    .shell-tx-desk {
       display: none;
     }
 

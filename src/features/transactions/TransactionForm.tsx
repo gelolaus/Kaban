@@ -30,36 +30,44 @@ export function TransactionForm({
   const [memo, setMemo] = useState(initial?.memo ?? '')
   const [date, setDate] = useState(initial?.date ?? isoDate(temporal().Now.plainDateISO()))
   const [cleared, setCleared] = useState<TransactionRow['cleared']>(initial?.cleared ?? 'uncleared')
+  const [saving, setSaving] = useState(false)
 
   if (!data || !repo) return null
 
   async function save() {
-    if (!repo || amount === null || !accountId) return
-    const signed = kind === 'inflow' ? amount : kind === 'outflow' ? -amount : -amount
+    if (!repo || amount === null || !accountId || saving) return
+    if (kind === 'outflow' && !categoryId) return
+    if (kind === 'transfer' && !transferTo) return
+    setSaving(true)
+    try {
+      const signed = kind === 'inflow' ? amount : -amount
 
-    if (initial) {
-      await repo.updateTransaction(initial.id, {
-        date,
-        amountCentavos: signed,
-        memo: memo || null,
-        cleared,
-        categoryId: kind === 'inflow' ? null : categoryId || null,
-        accountId,
-      })
-    } else {
-      await repo.insertTransaction({
-        accountId,
-        date,
-        amountCentavos: signed,
-        memo: memo || null,
-        cleared,
-        categoryId: kind === 'inflow' ? null : categoryId || null,
-        payeeName: payee || (kind === 'transfer' ? 'Transfer' : 'Payee'),
-        inflowToRta: kind === 'inflow',
-        transferAccountId: kind === 'transfer' ? transferTo : undefined,
-      })
+      if (initial) {
+        await repo.updateTransaction(initial.id, {
+          date,
+          amountCentavos: signed,
+          memo: memo || null,
+          cleared,
+          categoryId: kind === 'inflow' ? null : categoryId || null,
+          accountId,
+        })
+      } else {
+        await repo.insertTransaction({
+          accountId,
+          date,
+          amountCentavos: signed,
+          memo: memo || null,
+          cleared,
+          categoryId: kind === 'inflow' ? null : categoryId || null,
+          payeeName: payee || (kind === 'transfer' ? 'Transfer' : 'Payee'),
+          inflowToRta: kind === 'inflow',
+          transferAccountId: kind === 'transfer' ? transferTo : undefined,
+        })
+      }
+      await onSaved()
+    } finally {
+      setSaving(false)
     }
-    await onSaved()
   }
 
   return (
@@ -201,7 +209,7 @@ export function TransactionForm({
           </label>
         ))}
       </fieldset>
-      <Button type="submit" variant="primary">
+      <Button type="submit" variant="primary" disabled={saving}>
         Save transaction
       </Button>
       {initial && onDeleted ? (

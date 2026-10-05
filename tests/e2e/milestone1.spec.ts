@@ -5,9 +5,7 @@ test.describe.configure({ mode: 'serial' })
 
 async function waitReady(page: import('@playwright/test').Page) {
   await page.goto('/plan')
-  await expect(
-    page.getByTestId('ready-to-assign').or(page.getByTestId('ready-to-assign-phone')),
-  ).toBeVisible({
+  await expect(page.locator('[data-testid="ready-to-assign"]:visible')).toBeVisible({
     timeout: 60_000,
   })
 }
@@ -23,7 +21,8 @@ test('G1 to G4 golden budget flow', async ({ page }) => {
   await page.getByLabel('Checking').check()
   await page.getByLabel('Starting balance').fill('10000')
   await page.getByRole('button', { name: 'Save account' }).click()
-  await expect(page.getByText('Test Wallet')).toBeVisible()
+  await expect(page.getByRole('dialog')).toBeHidden()
+  await expect(page.locator('.account-list').getByText('Test Wallet')).toBeVisible()
 
   await page.goto('/plan')
   await expect(page.getByTestId('ready-to-assign')).toContainText('₱10,000.00')
@@ -62,6 +61,7 @@ test('G1 to G4 golden budget flow', async ({ page }) => {
   await page.getByLabel('Credit card').check()
   await page.getByLabel('Starting balance').fill('0')
   await page.getByRole('button', { name: 'Save account' }).click()
+  await expect(page.getByRole('dialog')).toBeHidden()
 
   await page.getByRole('button', { name: 'Transaction' }).click()
   await expect(dialog).toBeVisible()
@@ -71,6 +71,7 @@ test('G1 to G4 golden budget flow', async ({ page }) => {
   await dialog.getByLabel('Category').selectOption({ label: 'Dining out' })
   await dialog.getByLabel('Account').selectOption({ label: 'Test Card' })
   await dialog.getByRole('button', { name: 'Save transaction' }).click()
+  await expect(dialog).toBeHidden()
 
   await page.goto('/plan')
   await expect(page.getByTestId('ready-to-assign')).toContainText('₱6,000.00')
