@@ -9,7 +9,8 @@
   "scripts": {
     "dev": "vite --port 5173 --strictPort",
     "preview": "vite preview --port 4173 --strictPort",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node --experimental-strip-types scripts/write-headers.ts",
+    "icons": "node --experimental-strip-types scripts/make-icons.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:css": "stylelint \"src/**/*.css\"",
@@ -24,10 +25,12 @@
     "@fontsource-variable/newsreader": "5.3.0",
     "@js-temporal/polyfill": "0.5.1",
     "@oddbird/popover-polyfill": "0.7.3",
+    "@tursodatabase/sync-wasm": "0.8.1",
     "lucide-react": "1.52.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
     "react-router": "8.4.0",
+    "ulid": "3.0.2",
     "workbox-window": "7.4.1"
   },
   "devDependencies": {

@@ -1,0 +1,14 @@
+---
+description: Kaban project rules
+globs:
+alwaysApply: true
+---
+
+Read and follow `AGENTS.md` and `docs/guidance/modern-web.md` before any change.
+
+Hard rules most often broken:
+1. Money is integer centavos with `parseMoney` / `formatMoney` only — never `parseFloat`.
+2. No hex colors, `px` font sizes, `outline: none`, `@import`, or `*` selectors outside `tokens.css`.
+3. `engine/` must not import React, storage, sync, UI, features, app, or DOM globals.
+4. No `innerHTML` / `dangerouslySetInnerHTML`; render untrusted text as text.
+5. Do not edit anything under `docs/`.
