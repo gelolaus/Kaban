@@ -61,3 +61,7 @@ Run these in the "Kaban Test" plan in YNAB. If YNAB disagrees, change the rule, 
 
 1. Covered card spending of 600.00; pay 800.00.
 2. Expected: payment category available −200.00 and cash overspending 200.00; next month payment category 0 and Ready to Assign lower by 200.00.
+
+## Task 6 property checks
+
+Cash identity, input-order independence, purity, and a 10,000-transaction history check live in `compute.properties.test.ts`. No rule text changed during those checks; statuses above still match the Vitest suites.
