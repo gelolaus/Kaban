@@ -1,0 +1,35 @@
+@layer components {
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    border-radius: var(--radius-pill);
+    padding-inline: var(--space-3);
+    padding-block: var(--space-1);
+    white-space: nowrap;
+    font-weight: 500;
+  }
+
+  .status-funded {
+    background: var(--control);
+  }
+
+  .status-underfunded {
+    background: transparent;
+    border: 1px solid var(--ink-2);
+  }
+
+  .status-overspent {
+    background: var(--signal);
+    color: var(--on-signal);
+  }
+
+  .status-zero {
+    color: var(--ink-2);
+    padding-inline: 0;
+  }
+
+  .status-marker {
+    flex: none;
+  }
+}

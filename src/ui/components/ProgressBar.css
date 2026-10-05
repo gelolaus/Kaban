@@ -1,0 +1,32 @@
+@layer components {
+  .progress-bar {
+    display: block;
+    width: 100%;
+    height: var(--bar-h);
+    border: 0;
+    border-radius: 3px;
+    background: var(--track);
+    overflow: hidden;
+    appearance: none;
+  }
+
+  .progress-bar::-webkit-progress-bar {
+    background: var(--track);
+  }
+
+  .progress-bar::-webkit-progress-value {
+    background: var(--ink);
+  }
+
+  .progress-bar::-moz-progress-bar {
+    background: var(--ink);
+  }
+
+  .progress-danger::-webkit-progress-value {
+    background: var(--signal);
+  }
+
+  .progress-danger::-moz-progress-bar {
+    background: var(--signal);
+  }
+}
