@@ -8,13 +8,22 @@ import { AccountsScreen } from '../features/accounts/AccountsScreen.tsx'
 import { ReflectScreen } from '../features/reflect/ReflectScreen.tsx'
 import { SettingsScreen } from '../features/settings/SettingsScreen.tsx'
 import { Gallery } from '../features/gallery/Gallery.tsx'
+import { BudgetProvider } from '../state/BudgetContext.tsx'
+
+function BudgetShell() {
+  return (
+    <BudgetProvider>
+      <Shell />
+    </BudgetProvider>
+  )
+}
 
 export function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<RootRedirect />} />
-        <Route element={<Shell />}>
+        <Route element={<BudgetShell />}>
           <Route path="/home" element={<HomeScreen />} />
           <Route path="/plan" element={<PlanScreen />} />
           <Route path="/spending" element={<SpendingScreen />} />

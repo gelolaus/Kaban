@@ -41,7 +41,6 @@
     grid-area: main;
     overflow: auto;
     padding: var(--space-4);
-    outline: none;
   }
 
   .shell-inspector {

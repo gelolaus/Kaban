@@ -1,5 +1,8 @@
-import { PlaceholderScreen } from '../placeholder/PlaceholderScreen.tsx'
-
 export function ReflectScreen() {
-  return <PlaceholderScreen title="Reflect" builtIn="Plan 6" />
+  return (
+    <>
+      <h1 tabIndex={-1}>Reflect</h1>
+      <p>Reflect charts arrive in Plan 6.</p>
+    </>
+  )
 }

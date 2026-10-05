@@ -5,13 +5,43 @@ import { NAV_ITEMS } from './nav.ts'
 import { useRouteAnnouncer } from './useRouteAnnouncer.ts'
 import { Sheet } from '../ui/components/Sheet.tsx'
 import { ToastRegion } from '../ui/components/ToastRegion.tsx'
+import { TransactionForm } from '../features/transactions/TransactionForm.tsx'
+import { useBudget } from '../state/BudgetContext.tsx'
 import './shell.css'
 
 export function Shell() {
   useRouteAnnouncer()
   const location = useLocation()
+  const { refresh, status, errorMessage } = useBudget()
   const [txOpen, setTxOpen] = useState(false)
   const showFab = location.pathname !== '/reflect'
+
+  if (status === 'tab-blocked') {
+    return (
+      <main id="content" className="shell-main" tabIndex={-1}>
+        <h1>Kaban is already open in another tab</h1>
+        <p>Close the other tab, then reload this page.</p>
+      </main>
+    )
+  }
+
+  if (status === 'error') {
+    return (
+      <main id="content" className="shell-main" tabIndex={-1}>
+        <h1>Could not open the budget</h1>
+        <p>{errorMessage}</p>
+      </main>
+    )
+  }
+
+  if (status === 'loading') {
+    return (
+      <main id="content" className="shell-main" tabIndex={-1}>
+        <h1>Kaban</h1>
+        <p>Opening local budget.</p>
+      </main>
+    )
+  }
 
   return (
     <div className="shell">
@@ -24,16 +54,12 @@ export function Shell() {
           <div className="ink-2">Personal plan</div>
         </div>
         {NAV_ITEMS.filter((n) => n.laptop).map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className="shell-nav"
-            aria-label={item.label}
-          >
+          <NavLink key={item.path} to={item.path} className="shell-nav" aria-label={item.label}>
             <item.icon size={18} strokeWidth={1.5} aria-hidden />
             <span className="shell-nav-label">{item.label}</span>
           </NavLink>
-        ))}      </nav>
+        ))}{' '}
+      </nav>
 
       <main id="content" className="shell-main" tabIndex={-1}>
         <Outlet />
@@ -60,7 +86,12 @@ export function Shell() {
       ) : null}
 
       <Sheet open={txOpen} onClose={() => setTxOpen(false)} title="New transaction">
-        <p>Adding transactions arrives in plan 2.</p>
+        <TransactionForm
+          onSaved={async () => {
+            setTxOpen(false)
+            await refresh()
+          }}
+        />
       </Sheet>
       <ToastRegion />
     </div>

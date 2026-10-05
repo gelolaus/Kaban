@@ -5,6 +5,7 @@ test('laptop shell', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 })
   await page.goto('/')
   await expect(page).toHaveURL(/\/plan/)
+  await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible({ timeout: 60_000 })
   const mainNav = page.getByRole('navigation', { name: 'Main' })
   await expect(mainNav.getByRole('link', { name: 'Plan' })).toBeVisible()
   await expect(mainNav.getByRole('link', { name: 'Spending' })).toBeVisible()
