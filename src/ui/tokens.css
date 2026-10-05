@@ -86,7 +86,9 @@
   }
 
   @media (max-width: 760px) {
-    :root {
+    :root,
+    :root[data-density='compact'],
+    :root[data-density='comfortable'] {
       --fs-body: 0.875rem;
       --row-h: 56px;
       --card-radius: 14px;

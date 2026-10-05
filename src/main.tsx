@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import { initTemporal } from './domain/dates.ts'
 import { applyDensity, readDensity } from './ui/density.ts'
+import { App } from './app/App.tsx'
 import './ui/layers.css'
 import './ui/tokens.css'
 import './ui/base.css'
@@ -16,14 +17,7 @@ async function boot() {
 
   const root = document.getElementById('root')
   if (!root) throw new Error('Root element missing')
-
-  if (import.meta.env.DEV && location.pathname === '/dev/gallery') {
-    const { Gallery } = await import('./features/gallery/Gallery.tsx')
-    createRoot(root).render(<Gallery />)
-    return
-  }
-
-  createRoot(root).render(<h1>Kaban</h1>)
+  createRoot(root).render(<App />)
 }
 
 void boot()
