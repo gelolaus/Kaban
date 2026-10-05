@@ -20,8 +20,8 @@ export default defineConfig({
         display: 'standalone',
         start_url: '/',
         scope: '/',
-        theme_color: '#000000',
-        background_color: '#000000',
+        theme_color: '#0C0806',
+        background_color: '#0C0806',
         categories: ['finance'],
         icons: [
           { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },

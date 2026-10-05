@@ -2,7 +2,8 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import sharp from 'sharp'
 
-const SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#000000"/><circle cx="256" cy="256" r="120" fill="none" stroke="#FFFFFF" stroke-width="28"/><circle cx="352" cy="160" r="28" fill="#C8102E"/></svg>`
+/** Warm ink canvas with a coral mark — Wantap language, not black/white. */
+const SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="#0C0806"/><circle cx="256" cy="256" r="120" fill="none" stroke="#E8A87C" stroke-width="28"/><circle cx="352" cy="160" r="28" fill="#E8A87C"/></svg>`
 
 export async function makeIcons(outDir = 'public/icons'): Promise<void> {
   mkdirSync(outDir, { recursive: true })
@@ -16,7 +17,7 @@ export async function makeIcons(outDir = 'public/icons'): Promise<void> {
     .png()
     .toBuffer()
   await sharp({
-    create: { width: 512, height: 512, channels: 3, background: '#000000' },
+    create: { width: 512, height: 512, channels: 3, background: '#0C0806' },
   })
     .composite([{ input: mark, gravity: 'center' }])
     .png()
