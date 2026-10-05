@@ -1,6 +1,8 @@
 import { defineConfig } from 'vite'
 
-const isolate = process.env.SPIKE_ISOLATE === '1'
+// Isolation is required for SharedArrayBuffer / WASM workers.
+// Set SPIKE_ISOLATE=0 to disable (for Task 5 comparison runs).
+const isolate = process.env.SPIKE_ISOLATE !== '0'
 const isolationHeaders = isolate
   ? {
       'Cross-Origin-Opener-Policy': 'same-origin',

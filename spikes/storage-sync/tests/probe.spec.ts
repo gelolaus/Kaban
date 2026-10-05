@@ -5,6 +5,7 @@ test('T0: probe reports a secure OPFS context and handles persistence', async ({
   await page.waitForFunction(() => 'spike' in window)
   const env: EnvReport = await page.evaluate(() => window.spike.probe())
   expect(env.secureContext).toBe(true)
+  expect(env.crossOriginIsolated).toBe(true)
   expect(env.opfs).toBe(true)
   expect(typeof env.persistSupported).toBe('boolean')
   const granted = await page.evaluate(() => window.spike.persist())
