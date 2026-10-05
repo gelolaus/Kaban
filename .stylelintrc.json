@@ -1,3 +1,23 @@
 {
-  "extends": ["stylelint-config-standard"]
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "declaration-property-unit-disallowed-list": {
+      "font-size": ["px"],
+      "line-height": ["px"]
+    },
+    "color-no-hex": true,
+    "selector-max-universal": 0,
+    "at-rule-disallowed-list": ["import"],
+    "declaration-property-value-disallowed-list": {
+      "outline": ["none", "0"]
+    }
+  },
+  "overrides": [
+    {
+      "files": ["src/ui/tokens.css"],
+      "rules": {
+        "color-no-hex": null
+      }
+    }
+  ]
 }
