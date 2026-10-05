@@ -199,7 +199,7 @@ All files are under `spikes/storage-sync/` unless noted.
 - [x] **Step 2: Run them.** Run `pnpm test failure.spec.ts`. Expected: T7 passes or fails honestly; T8 and T9 skip without credentials and pass with them. Any test that fails because data is lost or corrupted is a spike failure: stop and report.
 - [x] **Step 3: Adjust `src/db.ts`** only if a test shows an unhandled error escaping as a hang or crash (for example wrap `open` so a rejected second open leaves the first connection untouched). Keep fixes minimal; this is a spike.
 - [x] **Step 4: Note the observed behavior** of T7 (second tab fails with error text, or works) and the error messages from T8 and T9 for the decision record.
-- [ ] **Step 5: Commit checkpoint.** Files: `tests/failure.spec.ts` and any `src` changes. Message:
+- [x] **Step 5: Commit checkpoint.** Files: `tests/failure.spec.ts` and any `src` changes. Message:
   ```
   test(spike): cover second tab, offline push, and invalid token behavior
 
@@ -219,19 +219,19 @@ All files are under `spikes/storage-sync/` unless noted.
 - Consumes: the built app from Tasks 1 to 4.
 - Produces: a deployable `dist/` that works offline.
 
-- [ ] **Step 1: Add the PWA plugin** to `vite.config.ts` using `VitePWA` with `registerType: 'autoUpdate'`, a manifest (`name: 'Kaban spike'`, `short_name: 'Spike'`, `display: 'standalone'`, `start_url: '/'`, `theme_color` and `background_color` `#000000`, one `icon.svg` icon with `sizes: 'any'`), and `workbox.globPatterns: ['**/*.{js,css,html,wasm,svg}']` with `maximumFileSizeToCacheInBytes: 20971520` so the WASM file is precached. Add a second Playwright project `preview` on port 5198 whose `webServer` is `pnpm build && pnpm preview --port 5198`.
-- [ ] **Step 2: Write the failing test** `tests/pwa.spec.ts` (project `preview`):
+- [x] **Step 1: Add the PWA plugin** to `vite.config.ts` using `VitePWA` with `registerType: 'autoUpdate'`, a manifest (`name: 'Kaban spike'`, `short_name: 'Spike'`, `display: 'standalone'`, `start_url: '/'`, `theme_color` and `background_color` `#000000`, one `icon.svg` icon with `sizes: 'any'`), and `workbox.globPatterns: ['**/*.{js,css,html,wasm,svg}']` with `maximumFileSizeToCacheInBytes: 20971520` so the WASM file is precached. Add a second Playwright project `preview` on port 5198 whose `webServer` is `pnpm build && pnpm preview --port 5198`.
+- [x] **Step 2: Write the failing test** `tests/pwa.spec.ts` (project `preview`):
   - **T10** `the built app works offline`: load `/`, wait for the service worker to be active (`navigator.serviceWorker.ready`), `open({device:'A'})`, add a row, `context.setOffline(true)`, reload, `window.spike` still exists, `open` works, and the row is listed.
   - **T11** `the wasm file is precached`: after the service worker is active, `caches.keys()` then `cache.keys()` includes a request whose URL ends with `.wasm`.
-- [ ] **Step 3: Run it.** Run `pnpm test --project=preview pwa.spec.ts`. Expected: FAIL at first if the WASM file is missing from the precache or the worker fails; fix `globPatterns` until it passes.
-- [ ] **Step 4: Find out whether cross-origin isolation headers are needed.** Run the whole suite twice: `pnpm test` and `SPIKE_ISOLATE=1 pnpm test`. If everything passes without isolation, record "no COOP/COEP needed". If the first run fails with an error mentioning `SharedArrayBuffer`, record "COOP and COEP required", and add them to `public/_headers`:
+- [x] **Step 3: Run it.** Run `pnpm test --project=preview pwa.spec.ts`. Expected: FAIL at first if the WASM file is missing from the precache or the worker fails; fix `globPatterns` until it passes.
+- [x] **Step 4: Find out whether cross-origin isolation headers are needed.** Run the whole suite twice: `pnpm test` and `SPIKE_ISOLATE=1 pnpm test`. If everything passes without isolation, record "no COOP/COEP needed". If the first run fails with an error mentioning `SharedArrayBuffer`, record "COOP and COEP required", and add them to `public/_headers`:
   ```
   /*
     Cross-Origin-Opener-Policy: same-origin
     Cross-Origin-Embedder-Policy: require-corp
   ```
   (Plan 1's security headers must then include them.)
-- [ ] **Step 5: Human step H4: deploy.** Run `pnpm exec wrangler login`, then `pnpm exec wrangler pages project create kaban-spike --production-branch main`, then `pnpm build` and `pnpm exec wrangler pages deploy dist --project-name kaban-spike`. Expected: a URL ending in `.pages.dev`. Open it on the laptop and confirm `window.spike.probe()` shows `secureContext: true`.
+- [x] **Step 5: Human step H4: deploy.** Run `pnpm exec wrangler login`, then `pnpm exec wrangler pages project create kaban-spike --production-branch main`, then `pnpm build` and `pnpm exec wrangler pages deploy dist --project-name kaban-spike`. Expected: a URL ending in `.pages.dev`. Open it on the laptop and confirm `window.spike.probe()` shows `secureContext: true`.
 - [ ] **Step 6: Commit checkpoint.** Files: `vite.config.ts`, `playwright.config.ts`, `public/_headers`, `public/icon.svg`, `tests/pwa.spec.ts`. Message:
   ```
   feat(spike): add service worker precache and offline reload tests
