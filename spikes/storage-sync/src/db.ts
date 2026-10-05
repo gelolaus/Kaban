@@ -12,12 +12,15 @@ export interface SpikeDb {
   pull(): Promise<boolean>
   stats(): Promise<Record<string, unknown>>
   close(): Promise<void>
+  exec(sql: string): Promise<void>
 }
 
 export async function openDb(opts: OpenOptions): Promise<SpikeDb> {
   const db: Database = await connect({
     path: 'kaban-spike.db',
     clientName: opts.device,
+    ...(opts.url !== undefined ? { url: opts.url } : {}),
+    ...(opts.authToken !== undefined ? { authToken: opts.authToken } : {}),
   })
 
   if (opts.ensureSchema !== false) {
@@ -96,6 +99,10 @@ export async function openDb(opts: OpenOptions): Promise<SpikeDb> {
 
     async close(): Promise<void> {
       await db.close()
+    },
+
+    async exec(sql: string): Promise<void> {
+      await db.exec(sql)
     },
   }
 }

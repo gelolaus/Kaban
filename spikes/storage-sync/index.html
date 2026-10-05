@@ -10,6 +10,22 @@
     <main id="content" tabindex="-1">
       <h1>Kaban storage sync spike</h1>
       <p>Environment probe and local database spike.</p>
+
+      <form id="pair-form">
+        <fieldset>
+          <legend>Pairing</legend>
+          <p>
+            <label for="db-url">Database URL</label>
+            <input id="db-url" name="url" type="url" autocomplete="off" spellcheck="false" />
+          </p>
+          <p>
+            <label for="db-token">Auth token</label>
+            <input id="db-token" name="authToken" type="password" autocomplete="off" spellcheck="false" />
+          </p>
+          <button type="submit">Pair</button>
+        </fieldset>
+      </form>
+
       <div role="group" aria-label="Spike actions">
         <button type="button">Probe</button>
         <button type="button">Persist</button>

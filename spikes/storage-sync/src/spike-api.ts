@@ -37,6 +37,7 @@ export interface SpikeApi {
   stats(): Promise<Record<string, unknown>>
   persist(): Promise<boolean>
   close(): Promise<void>
+  resetRemote(): Promise<void>
 }
 
 declare global {

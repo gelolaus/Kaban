@@ -145,7 +145,7 @@ All files are under `spikes/storage-sync/` unless noted.
 - [x] **Step 4: If `pnpm dev` fails to load the WASM or a worker** (console error naming a worker or `.wasm` import), switch the import in `src/db.ts` to `@tursodatabase/sync-wasm/vite` for development only (the package exports this subpath for Vite dev). Note which import worked; it goes in the decision record.
 - [x] **Step 5: Run the tests.** Run `pnpm test local.spec.ts`. Expected: PASS (4 passed).
 - [x] **Step 6: Record numbers** by running `spike.stats()` in the browser console after 50 writes and noting `mainWalSize` and the OPFS usage from `probe()`. Keep the values for the decision record.
-- [ ] **Step 7: Commit checkpoint.** Files: `src/db.ts`, `src/main.ts`, `index.html`, `tests/local.spec.ts`. Message:
+- [x] **Step 7: Commit checkpoint.** Files: `src/db.ts`, `src/main.ts`, `index.html`, `tests/local.spec.ts`. Message:
   ```
   feat(spike): add local Turso database in OPFS with persistence tests
 
@@ -164,15 +164,15 @@ All files are under `spikes/storage-sync/` unless noted.
 - Consumes: `openDb` from Task 2.
 - Produces: `openDb` now honors `OpenOptions.url` and `authToken` (passed to `connect`) and `ensureSchema`. `push`, `pull` and `stats` call the database's `push()`, `pull()` and `stats()`.
 
-- [ ] **Step 1: Write the failing tests** `tests/sync.spec.ts`. Read `SPIKE_TURSO_URL` and `SPIKE_TURSO_TOKEN`; if either is missing, `test.skip` the whole file with the message `needs SPIKE_TURSO_URL and SPIKE_TURSO_TOKEN`. Create two browser contexts, `A` and `B`, each with its own page, as two devices. Before each test, clear the remote by opening a third context, running `open({device:'reset', url, authToken})`, `DELETE FROM ledger`, `DELETE FROM note` through a helper `window.spike.resetRemote()` (add `resetRemote(): Promise<void>` to `SpikeApi` and `main.ts`; it runs the two deletes then `push()`). Tests:
+- [x] **Step 1: Write the failing tests** `tests/sync.spec.ts`. Read `SPIKE_TURSO_URL` and `SPIKE_TURSO_TOKEN`; if either is missing, `test.skip` the whole file with the message `needs SPIKE_TURSO_URL and SPIKE_TURSO_TOKEN`. Create two browser contexts, `A` and `B`, each with its own page, as two devices. Before each test, clear the remote by opening a third context, running `open({device:'reset', url, authToken})`, `DELETE FROM ledger`, `DELETE FROM note` through a helper `window.spike.resetRemote()` (add `resetRemote(): Promise<void>` to `SpikeApi` and `main.ts`; it runs the two deletes then `push()`). Tests:
   - **T3** `second device bootstraps existing tables and rows`: A opens with the remote, adds 2 ledger rows, pushes. B opens with the remote and `ensureSchema: false`, then `tableNames()` includes `ledger` and `note`, and `listLedger()` returns exactly A's 2 rows (no duplicates).
   - **T4** `two offline edits to different rows both survive`: A and B both open and sync once. Set both contexts offline with `context.setOffline(true)`. A adds ledger `'a'`, B adds ledger `'b'`. Go online. A pushes, then B pushes, then A pulls, then B pulls. Both devices list both rows (`'a'` and `'b'`, 2 rows each, no duplicates).
   - **T5** `last push wins for the same row`: both devices sync once with `setNote('n1','start')` pushed by A and pulled by B. Offline, A sets `n1` to `'from-A'`, B sets `n1` to `'from-B'`. Online: A pushes, then B pushes, then both pull. Both devices read `getNote('n1')` as `'from-B'`. If the actual value differs, the test fails; copy the actual behavior into the decision record.
   - **T6** `a write made offline survives a reload while still offline`: one device, offline, adds a row, reloads the page (still offline), reopens with the remote config, and the row is present.
-- [ ] **Step 2: Run them (without credentials) to confirm they skip,** then with credentials to see them fail. Run `pnpm test sync.spec.ts`. Expected without env: `4 skipped`. Then set the two variables in the shell (not in a file in the repo) and run again. Expected: FAIL (remote options are ignored).
-- [ ] **Step 3: Implement remote support** in `src/db.ts`: pass `url` and `authToken` to `connect` when present. `resetRemote` is a helper in `main.ts`, not in `SpikeDb`.
-- [ ] **Step 4: Add a pairing form** to `index.html`: two fields (database URL, token) and a Pair button. On pairing, store both in IndexedDB (database `spike-credentials`, object store `kv`, keys `url` and `authToken`), never in `localStorage`. On page load, read them back. Tests keep using `open({url, authToken})` directly.
-- [ ] **Step 5: Run the tests with credentials.** Expected: PASS (4 passed). If T3 shows duplicated rows or a missing table, or T4 loses a row, stop and report; that fails criterion 4.
+- [x] **Step 2: Run them (without credentials) to confirm they skip,** then with credentials to see them fail. Run `pnpm test sync.spec.ts`. Expected without env: `4 skipped`. Then set the two variables in the shell (not in a file in the repo) and run again. Expected: FAIL (remote options are ignored).
+- [x] **Step 3: Implement remote support** in `src/db.ts`: pass `url` and `authToken` to `connect` when present. `resetRemote` is a helper in `main.ts`, not in `SpikeDb`.
+- [x] **Step 4: Add a pairing form** to `index.html`: two fields (database URL, token) and a Pair button. On pairing, store both in IndexedDB (database `spike-credentials`, object store `kv`, keys `url` and `authToken`), never in `localStorage`. On page load, read them back. Tests keep using `open({url, authToken})` directly.
+- [x] **Step 5: Run the tests with credentials.** Expected: PASS (4 passed). If T3 shows duplicated rows or a missing table, or T4 loses a row, stop and report; that fails criterion 4.
 - [ ] **Step 6: Commit checkpoint.** Files: `src/db.ts`, `src/main.ts`, `src/spike-api.ts`, `index.html`, `tests/sync.spec.ts`. Message:
   ```
   feat(spike): add Turso sync with two-device offline tests
