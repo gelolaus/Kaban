@@ -40,7 +40,7 @@ Companion files:
 | Status display | Monochrome plus one red signal. Thin solid progress bars. No dot-matrix font or dot bars. |
 | Fonts | Nothing Serif and Geist only. Files self-hosted. Free fallbacks until the user supplies the Nothing Serif files. |
 | Phone navigation | Five tabs like YNAB's mobile app: Home, Plan, Spending, Accounts, Reflect, plus an extended "+ Transaction" button. |
-| Browser support | Assumed Chromium-first (current Chrome and Edge on Windows, Chrome on Android). Firefox and Safari best effort. To be confirmed (section 11). |
+| Browser support | Chromium-first (current Chrome and Edge on Windows, Chrome on Android). Firefox and Safari best effort. Confirmed by the owner. |
 | Dev workflow | Grok 4.7 High builds in Cursor from written plans. Claude Opus 5.5 reviews and fixes. Conventional Commits throughout. |
 | YNAB verification | Phases 1 and 2 rules are verified. Each later phase is verified just before its plan is written. |
 
@@ -270,7 +270,6 @@ Bank linking or any automatic bank import. Multi-user accounts, sharing and publ
 
 ## 11. Open items
 
-- **Browser support policy:** the assumption in section 2 (Chromium-first) needs the owner's confirmation. It decides which fallbacks and polyfills are required (`Temporal` is the main one).
 - **Nothing Serif font files:** the owner will supply them. Until then the Newsreader fallback is used.
 - **Turso Sync:** general-availability status and exact browser requirements will be confirmed by Plan 0 against Turso's current documentation.
 - **YNAB rules and features not yet verified:** R6 to R9, Auto-Assign, Reflect, scheduled transactions, splits and reconcile. These are verified per phase.
