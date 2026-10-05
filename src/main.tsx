@@ -7,8 +7,6 @@ import { App } from './app/App.tsx'
 import './ui/layers.css'
 import './ui/tokens.css'
 import './ui/base.css'
-import '@fontsource-variable/geist/wght.css'
-import '@fontsource-variable/newsreader/opsz.css'
 
 async function boot() {
   if (!('popover' in HTMLElement.prototype)) {

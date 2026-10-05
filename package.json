@@ -21,8 +21,6 @@
     "verify:e2e": "pnpm verify && pnpm test:e2e"
   },
   "dependencies": {
-    "@fontsource-variable/geist": "5.3.0",
-    "@fontsource-variable/newsreader": "5.3.0",
     "@js-temporal/polyfill": "0.5.1",
     "@oddbird/popover-polyfill": "0.7.3",
     "@tursodatabase/sync-wasm": "0.8.1",

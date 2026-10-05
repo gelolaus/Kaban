@@ -26,12 +26,49 @@
 }
 
 @layer base {
+  /* Metric-matched fallbacks reduce layout shift before woff2 swaps in. */
   @font-face {
-    font-family: 'Nothing Serif';
-    src: url('/fonts/nothing-serif.woff2') format('woff2');
-    font-weight: 300 400;
+    font-family: 'Plus Jakarta Sans Fallback';
+    src: local('Segoe UI'), local('Helvetica Neue'), local('Arial');
+    size-adjust: 105%;
+    ascent-override: 95%;
+    descent-override: 22%;
+    line-gap-override: 0%;
+  }
+
+  @font-face {
+    font-family: 'Syne Fallback';
+    src: local('Segoe UI'), local('Helvetica Neue'), local('Arial');
+    size-adjust: 100%;
+    ascent-override: 95%;
+    descent-override: 25%;
+    line-gap-override: 0%;
+  }
+
+  @font-face {
+    font-family: 'Plus Jakarta Sans';
+    src: url('/fonts/plus-jakarta-sans-latin-wght-normal.woff2') format('woff2');
+    font-weight: 200 800;
     font-style: normal;
     font-display: swap;
+  }
+
+  @font-face {
+    font-family: Syne;
+    src: url('/fonts/syne-latin-wght-normal.woff2') format('woff2');
+    font-weight: 400 800;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /*
+   * Latin subsets often omit ₱ (U+20B1) and − (U+2212). Cover those glyphs
+   * from system UI fonts so money formatting never shows tofu.
+   */
+  @font-face {
+    font-family: 'Kaban Money Glyphs';
+    src: local('Segoe UI'), local('Arial Unicode MS'), local('Helvetica Neue'), local('Noto Sans');
+    unicode-range: U+20B1, U+2212;
   }
 
   html {
@@ -44,7 +81,8 @@
     color: var(--ink);
     font: var(--fs-body) / 1.5 var(--font-sans);
     font-variant-numeric: tabular-nums;
-    accent-color: var(--ink);
+    font-feature-settings: 'tnum' 1;
+    accent-color: var(--accent);
     scrollbar-color: var(--ink-2) var(--track);
     scrollbar-width: thin;
     max-inline-size: 100%;
@@ -59,7 +97,15 @@
   h1,
   h2,
   h3 {
+    font-family: var(--font-display), 'Syne Fallback', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
     text-wrap: balance;
+  }
+
+  ::selection {
+    background: var(--accent-wash);
+    color: var(--ink);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -85,5 +131,17 @@
 
   .ink-2 {
     color: var(--ink-2);
+  }
+
+  .font-display {
+    font-family: var(--font-display), 'Syne Fallback', system-ui, sans-serif;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .font-money {
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
   }
 }
