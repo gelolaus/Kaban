@@ -4,6 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
+    <script>
+      try {
+        const v = localStorage.getItem('kaban:color-scheme')
+        if (v === 'light' || v === 'dark')
+          document.querySelector('meta[name="color-scheme"]').content = v
+      } catch {}
+    </script>
     <title>Kaban</title>
   </head>
   <body>
