@@ -1,0 +1,40 @@
+@layer components {
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .field-label {
+    font-weight: 500;
+  }
+
+  .field-hint {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: var(--fs-caption);
+  }
+
+  .field-error {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    color: var(--ink);
+  }
+
+  .field-control {
+    min-block-size: 2.5rem;
+    padding-inline: var(--space-3);
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--control);
+    font: 1rem / 1.5 var(--font-sans);
+  }
+
+  @media (pointer: coarse) {
+    .field-control {
+      min-block-size: 3rem;
+    }
+  }
+}
