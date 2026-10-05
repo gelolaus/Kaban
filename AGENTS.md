@@ -2,7 +2,7 @@
 
 ## Project
 
-Kaban is a personal zero-based budgeting PWA (YNAB alternative without bank linking). Local-first, PHP only, Chromium-first.
+Kaban is a personal zero-based budgeting PWA (YNAB alternative without bank linking). Local-first, PHP only, Chromium-first. Visual language follows Wantap (warm ink, coral, Syne, Plus Jakarta Sans).
 
 ## Commands
 
@@ -14,41 +14,39 @@ Kaban is a personal zero-based budgeting PWA (YNAB alternative without bank link
 
 ## Pinned versions
 
-| name                            | version |
-| ------------------------------- | ------- |
-| @axe-core/playwright            | 4.13.0  |
-| @eslint/js                      | 9.39.5  |
-| @fontsource-variable/geist      | 5.3.0   |
-| @fontsource-variable/newsreader | 5.3.0   |
-| @js-temporal/polyfill           | 0.5.1   |
-| @oddbird/popover-polyfill       | 0.7.3   |
-| @playwright/test                | 1.63.0  |
-| @tursodatabase/sync-wasm        | 0.8.1   |
-| @types/node                     | 24.12.2 |
-| @types/react                    | 19.3.0  |
-| @types/react-dom                | 19.3.0  |
-| @vitejs/plugin-react            | 6.1.1   |
-| eslint                          | 9.39.5  |
-| eslint-plugin-react             | 7.37.5  |
-| eslint-plugin-react-hooks       | 7.1.1   |
-| globals                         | 17.13.0 |
-| lucide-react                    | 1.52.0  |
-| prettier                        | 3.9.9   |
-| react                           | 19.3.0  |
-| react-dom                       | 19.3.0  |
-| react-router                    | 8.4.0   |
-| sharp                           | 0.35.5  |
-| stylelint                       | 17.16.0 |
-| stylelint-config-standard       | 40.0.0  |
-| typescript                      | 6.0.3   |
-| typescript-eslint               | 8.71.0  |
-| ulid                            | 3.0.2   |
-| vite                            | 8.3.2   |
-| vite-plugin-pwa                 | 2.0.0   |
-| vitest                          | 5.0.3   |
-| workbox-build                   | 7.4.1   |
-| workbox-window                  | 7.4.1   |
-| wrangler                        | 4.147.0 |
+| name                      | version |
+| ------------------------- | ------- |
+| @axe-core/playwright      | 4.13.0  |
+| @eslint/js                | 9.39.5  |
+| @js-temporal/polyfill     | 0.5.1   |
+| @oddbird/popover-polyfill | 0.7.3   |
+| @playwright/test          | 1.63.0  |
+| @tursodatabase/sync-wasm  | 0.8.1   |
+| @types/node               | 24.12.2 |
+| @types/react              | 19.3.0  |
+| @types/react-dom          | 19.3.0  |
+| @vitejs/plugin-react      | 6.1.1   |
+| eslint                    | 9.39.5  |
+| eslint-plugin-react       | 7.37.5  |
+| eslint-plugin-react-hooks | 7.1.1   |
+| globals                   | 17.13.0 |
+| lucide-react              | 1.52.0  |
+| prettier                  | 3.9.9   |
+| react                     | 19.3.0  |
+| react-dom                 | 19.3.0  |
+| react-router              | 8.4.0   |
+| sharp                     | 0.35.5  |
+| stylelint                 | 17.16.0 |
+| stylelint-config-standard | 40.0.0  |
+| typescript                | 6.0.3   |
+| typescript-eslint         | 8.71.0  |
+| ulid                      | 3.0.2   |
+| vite                      | 8.3.2   |
+| vite-plugin-pwa           | 2.0.0   |
+| vitest                    | 5.0.3   |
+| workbox-build             | 7.4.1   |
+| workbox-window            | 7.4.1   |
+| wrangler                  | 4.147.0 |
 
 ## Folder boundaries
 
@@ -87,5 +85,6 @@ Follow `docs/guidance/modern-web.md` section 11: tokens, light/dark, keyboard, t
 - `docs/superpowers/specs/2026-10-05-kaban-design.md`
 - `docs/guidance/modern-web.md`
 - `docs/guidance/commit-style.md`
-- `docs/design/kaban-mock.html` (look only)
+- `docs/design/kaban-mock.html` (structure only, not look)
+- Wantap look reference (wantap.cc / github.com/gelolaus/wantap.cc): `src/app/globals.css`, `src/components/ui/`, `src/components/layout/`, `src/fonts/`
 - `spikes/storage-sync/` (Turso reference)
