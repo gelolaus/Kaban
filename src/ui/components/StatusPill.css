@@ -8,15 +8,19 @@
     padding-block: var(--space-1);
     white-space: nowrap;
     font-weight: 500;
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
   }
 
   .status-funded {
     background: var(--control);
+    color: var(--ink);
   }
 
   .status-underfunded {
     background: transparent;
-    border: 1px solid var(--ink-2);
+    border: 1px solid var(--line-strong);
+    color: var(--ink);
   }
 
   .status-overspent {

@@ -4,38 +4,50 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
-    min-block-size: 1.5rem;
+    min-block-size: var(--control-h);
     padding-inline: var(--space-4);
     padding-block: var(--space-2);
-    border: 0;
-    border-radius: var(--radius-pill);
+    border: 1px solid transparent;
+    border-radius: var(--radius-xl);
     cursor: pointer;
     background: var(--control);
     color: var(--ink);
+    font: inherit;
+    font-weight: 500;
   }
 
   .btn-primary {
-    background: var(--highlight-bg);
-    color: var(--highlight-ink);
+    background: var(--accent);
+    color: var(--on-accent);
   }
 
-  /* Invert on highlight surfaces so primary stays readable */
+  /* Invert on accent surfaces so primary stays readable */
   :is(.plan-rta, .plan-phone-banner, .toast) .btn-primary {
-    background: var(--highlight-ink);
-    color: var(--highlight-bg);
+    background: var(--on-accent);
+    color: var(--accent);
+  }
+
+  :is(.plan-rta, .plan-phone-banner)[data-overassigned] .btn-primary {
+    background: var(--on-signal);
+    color: var(--signal);
   }
 
   .btn-ghost {
     background: transparent;
+    border-color: transparent;
   }
 
   :is(.plan-rta, .plan-phone-banner, .toast) .btn:not(.btn-primary) {
-    color: var(--highlight-ink);
+    color: inherit;
   }
 
   @media (pointer: coarse) {
     .btn {
       min-block-size: 2.75rem;
+    }
+
+    .btn-primary {
+      min-block-size: max(2.75rem, var(--control-h-cta));
     }
   }
 }

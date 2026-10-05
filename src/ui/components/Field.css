@@ -24,17 +24,23 @@
   }
 
   .field-control {
-    min-block-size: 2.5rem;
+    min-block-size: var(--control-h);
     padding-inline: var(--space-3);
-    border: 0;
-    border-radius: var(--radius-pill);
-    background: var(--control);
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-xl);
+    background: var(--surface);
+    color: var(--ink);
     font: 1rem / 1.5 var(--font-sans);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .field-control:user-invalid {
+    border-color: var(--signal);
   }
 
   @media (pointer: coarse) {
     .field-control {
-      min-block-size: 3rem;
+      min-block-size: max(3rem, var(--control-h-cta));
     }
   }
 }

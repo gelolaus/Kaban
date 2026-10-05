@@ -25,7 +25,7 @@ export function ToastRegion() {
 
 function ToastCard({ item }: { item: ToastItem }) {
   return (
-    <div id={`toast-${item.id}`} className="toast">
+    <div id={`toast-${item.id}`} className="toast" data-kind={item.kind}>
       <span>{item.message}</span>
       {item.action ? (
         <Button

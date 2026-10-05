@@ -1,11 +1,11 @@
 @layer components {
   .sheet {
     margin: auto;
-    border: 0;
+    border: 1px solid var(--line);
     border-radius: var(--card-radius);
     background: var(--surface);
     color: var(--ink);
-    padding: var(--space-4);
+    padding: var(--card-pad);
     max-inline-size: min(26rem, 100%);
     inline-size: min(26rem, 100%);
     box-sizing: border-box;
@@ -33,7 +33,7 @@
   }
 
   .sheet::backdrop {
-    background: rgb(0 0 0 / 55%);
+    background: color-mix(in srgb, var(--bg-dark) 55%, transparent);
     transition:
       background-color var(--dur) var(--ease),
       display var(--dur) allow-discrete,
@@ -50,9 +50,10 @@
   }
 
   .sheet-header h2 {
-    font-family: var(--font-serif);
-    font-weight: 300;
+    font-family: var(--font-display);
+    font-weight: 600;
     font-size: var(--fs-title);
+    letter-spacing: -0.02em;
   }
 
   @media (max-width: 760px) {
