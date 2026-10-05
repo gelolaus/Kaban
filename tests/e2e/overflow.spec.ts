@@ -11,7 +11,11 @@ async function waitAppReady(page: import('@playwright/test').Page, route: string
       async () =>
         page.evaluate(() => {
           const t = document.body?.innerText ?? ''
-          if (!t || t.includes('Opening local budget') || t.includes('already open in another tab')) {
+          if (
+            !t ||
+            t.includes('Opening local budget') ||
+            t.includes('already open in another tab')
+          ) {
             return false
           }
           return !!document.querySelector('.shell')

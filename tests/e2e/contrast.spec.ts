@@ -47,7 +47,11 @@ async function waitAppReady(page: Page, route: string) {
       async () =>
         page.evaluate(() => {
           const t = document.body?.innerText ?? ''
-          if (!t || t.includes('Opening local budget') || t.includes('already open in another tab')) {
+          if (
+            !t ||
+            t.includes('Opening local budget') ||
+            t.includes('already open in another tab')
+          ) {
             return false
           }
           return !!document.querySelector('.shell, .shell-main h1, #content h1')
@@ -55,7 +59,11 @@ async function waitAppReady(page: Page, route: string) {
       { timeout: 60_000 },
     )
     .toBe(true)
-  await expect(page.locator('.shell, [data-testid="ready-to-assign"], [data-testid="ready-to-assign-phone"]').first()).toBeVisible({
+  await expect(
+    page
+      .locator('.shell, [data-testid="ready-to-assign"], [data-testid="ready-to-assign-phone"]')
+      .first(),
+  ).toBeVisible({
     timeout: 60_000,
   })
 }

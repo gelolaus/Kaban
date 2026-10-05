@@ -29,7 +29,8 @@ describe('parseBackupPayload', () => {
   })
 
   test('rejects missing arrays', () => {
-    const { accounts: _a, ...rest } = base
+    const rest = { ...base }
+    delete (rest as { accounts?: unknown }).accounts
     expect(() => parseBackupPayload(rest)).toThrow(BackupValidationError)
   })
 
