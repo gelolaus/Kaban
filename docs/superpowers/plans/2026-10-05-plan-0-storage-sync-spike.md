@@ -173,7 +173,7 @@ All files are under `spikes/storage-sync/` unless noted.
 - [x] **Step 3: Implement remote support** in `src/db.ts`: pass `url` and `authToken` to `connect` when present. `resetRemote` is a helper in `main.ts`, not in `SpikeDb`.
 - [x] **Step 4: Add a pairing form** to `index.html`: two fields (database URL, token) and a Pair button. On pairing, store both in IndexedDB (database `spike-credentials`, object store `kv`, keys `url` and `authToken`), never in `localStorage`. On page load, read them back. Tests keep using `open({url, authToken})` directly.
 - [x] **Step 5: Run the tests with credentials.** Expected: PASS (4 passed). If T3 shows duplicated rows or a missing table, or T4 loses a row, stop and report; that fails criterion 4.
-- [ ] **Step 6: Commit checkpoint.** Files: `src/db.ts`, `src/main.ts`, `src/spike-api.ts`, `index.html`, `tests/sync.spec.ts`. Message:
+- [x] **Step 6: Commit checkpoint.** Files: `src/db.ts`, `src/main.ts`, `src/spike-api.ts`, `index.html`, `tests/sync.spec.ts`. Message:
   ```
   feat(spike): add Turso sync with two-device offline tests
 
@@ -192,13 +192,13 @@ All files are under `spikes/storage-sync/` unless noted.
 - Consumes: `SpikeApi` from Tasks 1 to 3.
 - Produces: `open`, `push` and `pull` reject with an `Error` whose `message` is preserved; the tests assert on rejection, not on message text, and print the message for the decision record.
 
-- [ ] **Step 1: Write the tests** `tests/failure.spec.ts`:
+- [x] **Step 1: Write the tests** `tests/failure.spec.ts`:
   - **T7** `a second tab does not corrupt the first` (no remote needed): in one context open page 1, `open({device:'A'})`, add a row. Open page 2 in the same context, call `open({device:'A'})` and record whether it resolves or rejects (`test.info().annotations.push({type:'tab2', description: ...})`). Then on page 1 `listLedger()` still returns the row, and a new `addLedger` still works. After closing page 2, page 1 `listLedger()` is consistent.
   - **T8** `push while offline rejects and keeps data` (needs credentials): open with the remote, add a row, `context.setOffline(true)`, `push()` rejects, `listLedger()` still has the row, go online, `push()` resolves, and a second device pulls the row.
   - **T9** `a wrong token gives an error and keeps local data` (needs credentials): open with the real URL and `authToken: 'invalid-token'`, `pull()` rejects, `addLedger` and `listLedger` still work locally.
-- [ ] **Step 2: Run them.** Run `pnpm test failure.spec.ts`. Expected: T7 passes or fails honestly; T8 and T9 skip without credentials and pass with them. Any test that fails because data is lost or corrupted is a spike failure: stop and report.
-- [ ] **Step 3: Adjust `src/db.ts`** only if a test shows an unhandled error escaping as a hang or crash (for example wrap `open` so a rejected second open leaves the first connection untouched). Keep fixes minimal; this is a spike.
-- [ ] **Step 4: Note the observed behavior** of T7 (second tab fails with error text, or works) and the error messages from T8 and T9 for the decision record.
+- [x] **Step 2: Run them.** Run `pnpm test failure.spec.ts`. Expected: T7 passes or fails honestly; T8 and T9 skip without credentials and pass with them. Any test that fails because data is lost or corrupted is a spike failure: stop and report.
+- [x] **Step 3: Adjust `src/db.ts`** only if a test shows an unhandled error escaping as a hang or crash (for example wrap `open` so a rejected second open leaves the first connection untouched). Keep fixes minimal; this is a spike.
+- [x] **Step 4: Note the observed behavior** of T7 (second tab fails with error text, or works) and the error messages from T8 and T9 for the decision record.
 - [ ] **Step 5: Commit checkpoint.** Files: `tests/failure.spec.ts` and any `src` changes. Message:
   ```
   test(spike): cover second tab, offline push, and invalid token behavior
