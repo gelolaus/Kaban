@@ -4,6 +4,7 @@ import { Amount } from '../../ui/components/Amount.tsx'
 import { Card } from '../../ui/components/Card.tsx'
 import { Sheet } from '../../ui/components/Sheet.tsx'
 import { TransactionForm } from '../transactions/TransactionForm.tsx'
+import '../screens.css'
 
 export function SpendingScreen() {
   const { data, refresh } = useBudget()
@@ -33,8 +34,13 @@ export function SpendingScreen() {
   const editing = data.transactions.find((t) => t.id === editingId)
 
   return (
-    <>
+    <div className="screen-stack">
       <h1 tabIndex={-1}>Spending</h1>
+      {grouped.length === 0 ? (
+        <Card>
+          <p className="empty-state">No transactions yet. Add one with Transaction.</p>
+        </Card>
+      ) : null}
       {grouped.map(([date, txs]) => (
         <section key={date}>
           <h2 className="ink-2">{date}</h2>
@@ -84,13 +90,6 @@ export function SpendingScreen() {
           />
         ) : null}
       </Sheet>
-
-      <style>{`
-        .tx-list { list-style:none; margin:0; padding:0; }
-        .tx-row { width:100%; border:0; background:transparent; text-align:start; padding:.75rem 1rem; cursor:pointer; color:inherit; }
-        .tx-l1, .tx-l2 { display:flex; justify-content:space-between; gap:.5rem; }
-        .tx-l2 { margin-top:.35rem; font-size: var(--fs-caption); }
-      `}</style>
-    </>
+    </div>
   )
 }

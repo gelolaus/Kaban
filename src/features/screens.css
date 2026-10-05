@@ -1,0 +1,127 @@
+@layer components {
+  .screen-stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--card-gap);
+  }
+
+  .screen-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    margin-block-end: var(--space-2);
+  }
+
+  .screen-header h1 {
+    margin: 0;
+  }
+
+  .screen-link {
+    color: inherit;
+    text-decoration: none;
+    padding: var(--space-2) var(--space-4);
+    background: var(--control);
+    border-radius: var(--radius-xl);
+    min-block-size: var(--control-h);
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .row-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .tx-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .tx-row {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    text-align: start;
+    padding: var(--space-3) 0;
+    cursor: pointer;
+    color: inherit;
+    font: inherit;
+    border-block-end: 1px solid var(--line);
+    display: block;
+  }
+
+  .row-list li,
+  .row-list .tx-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) 0;
+    border-block-end: 1px solid var(--line);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .row-list li:last-child,
+  .row-list .tx-row:last-child {
+    border-block-end: 0;
+  }
+
+  .tx-list li:last-child .tx-row {
+    border-block-end: 0;
+  }
+
+  .tx-l1,
+  .tx-l2 {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .tx-l2 {
+    margin-block-start: var(--space-1);
+    font-size: var(--fs-caption);
+  }
+
+  .kind-switch {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-block-end: var(--space-3);
+  }
+
+  .settings-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    margin-block-end: var(--space-6);
+    padding: var(--card-pad);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--card-radius);
+  }
+
+  .settings-section h2 {
+    margin: 0;
+  }
+
+  .file-label {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--control-h);
+    padding-inline: var(--space-4);
+    padding-block: var(--space-2);
+    border-radius: var(--radius-xl);
+    background: var(--control);
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .empty-state {
+    color: var(--ink-2);
+    margin: 0;
+  }
+}

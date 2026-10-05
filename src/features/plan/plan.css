@@ -20,17 +20,19 @@
   }
 
   .plan-month-title {
-    font-family: var(--font-serif);
-    font-weight: 300;
+    font-family: var(--font-display);
+    font-weight: 600;
     font-size: var(--fs-title);
+    letter-spacing: -0.02em;
   }
 
   .plan-circ {
-    inline-size: 1.75rem;
-    block-size: 1.75rem;
-    border-radius: 50%;
+    inline-size: var(--control-h);
+    block-size: var(--control-h);
+    border-radius: var(--radius-xl);
     border: 0;
     background: var(--control);
+    color: var(--ink);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -41,20 +43,35 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    background: var(--highlight-bg);
-    color: var(--highlight-ink);
+    background: var(--accent);
+    color: var(--on-accent);
     border-radius: var(--radius-pill);
     padding: var(--space-1) var(--space-1) var(--space-1) var(--space-4);
   }
 
+  .plan-rta[data-overassigned] {
+    background: var(--signal);
+    color: var(--on-signal);
+  }
+
   .plan-rta-amount {
-    font-family: var(--font-serif);
+    font-family: var(--font-display);
+    font-weight: 600;
     font-size: var(--fs-display-sm);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .plan-rta-amount .font-money {
+    font-family: inherit;
+    font-weight: inherit;
+    letter-spacing: inherit;
   }
 
   .plan-rta-label {
-    opacity: 0.6;
+    opacity: 0.7;
     font-size: var(--fs-caption);
+    font-family: var(--font-sans);
   }
 
   .plan-phone-banner {
@@ -70,6 +87,8 @@
   .plan-table {
     width: 100%;
     border-collapse: collapse;
+    font-family: var(--font-sans);
+    font-variant-numeric: tabular-nums;
   }
 
   .plan-table th,
@@ -97,6 +116,8 @@
 
   .plan-group {
     background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--card-radius);
   }
 
   .plan-group-caption {
@@ -138,7 +159,7 @@
   }
 
   .plan-row-selected {
-    background: var(--surface-selected);
+    background: var(--accent-wash);
   }
 
   .plan-breakdown {
@@ -160,6 +181,12 @@
     margin: 0;
   }
 
+  .plan-inspector-title {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
   @media (width <= 760px) {
     .plan-top {
       display: none;
@@ -169,10 +196,15 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: var(--highlight-bg);
-      color: var(--highlight-ink);
-      border-radius: 1.125rem;
+      background: var(--accent);
+      color: var(--on-accent);
+      border-radius: var(--radius-xl);
       padding: var(--space-3) var(--space-4);
+    }
+
+    .plan-phone-banner[data-overassigned] {
+      background: var(--signal);
+      color: var(--on-signal);
     }
 
     .plan-phone-banner .plan-rta-amount {

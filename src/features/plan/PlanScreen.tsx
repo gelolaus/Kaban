@@ -54,7 +54,7 @@ function InspectorBody({
   if (selected && selectedCat) {
     return (
       <Card>
-        <h2>{selectedCat.name}</h2>
+        <h2 className="plan-inspector-title">{selectedCat.name}</h2>
         <p>
           Available <Amount centavos={selected.available} />
         </p>
@@ -296,9 +296,24 @@ export function PlanScreen() {
             <ChevronRight size={18} strokeWidth={1.5} aria-hidden />
           </button>
         </div>
-        <div className="plan-rta" data-testid="ready-to-assign">
+        <div
+          className="plan-rta"
+          data-testid="ready-to-assign"
+          {...(view.readyToAssign < 0 ? { 'data-overassigned': '' } : {})}
+        >
           <span>
             <span className="plan-rta-amount">
+              {view.readyToAssign < 0 ? (
+                <svg
+                  aria-hidden="true"
+                  width="10"
+                  height="8"
+                  viewBox="0 0 10 8"
+                  className="status-marker"
+                >
+                  <path d="M5 0L10 8H0L5 0Z" fill="currentColor" />
+                </svg>
+              ) : null}{' '}
               <Amount centavos={view.readyToAssign} />
             </span>{' '}
             <span className="plan-rta-label">Ready to assign</span>
@@ -314,8 +329,23 @@ export function PlanScreen() {
         </div>
       </div>
 
-      <div className="plan-phone-banner" data-testid="ready-to-assign-phone">
+      <div
+        className="plan-phone-banner"
+        data-testid="ready-to-assign-phone"
+        {...(view.readyToAssign < 0 ? { 'data-overassigned': '' } : {})}
+      >
         <span className="plan-rta-amount">
+          {view.readyToAssign < 0 ? (
+            <svg
+              aria-hidden="true"
+              width="10"
+              height="8"
+              viewBox="0 0 10 8"
+              className="status-marker"
+            >
+              <path d="M5 0L10 8H0L5 0Z" fill="currentColor" />
+            </svg>
+          ) : null}{' '}
           <Amount centavos={view.readyToAssign} />
         </span>
         <span>Ready to assign</span>

@@ -8,6 +8,7 @@ import { MoneyInput } from '../../ui/components/MoneyInput.tsx'
 import { Sheet } from '../../ui/components/Sheet.tsx'
 import type { AccountType } from '../../storage/types.ts'
 import type { Centavos } from '../../domain/money.ts'
+import '../screens.css'
 
 export function AccountsScreen() {
   const { data, balances, repo, refresh } = useBudget()
@@ -42,34 +43,42 @@ export function AccountsScreen() {
   }
 
   return (
-    <>
-      <div className="vt">
+    <div className="screen-stack">
+      <div className="screen-header">
         <h1 tabIndex={-1}>Accounts</h1>
         <Button onClick={() => setOpen(true)}>Add account</Button>
       </div>
 
       <Card>
         <h2>Cash</h2>
-        <ul className="account-list">
-          {cash.map((a) => (
-            <li key={a.id}>
-              <span>{a.name}</span>
-              <Amount centavos={balances[a.id] ?? 0} />
-            </li>
-          ))}
-        </ul>
+        {cash.length === 0 ? (
+          <p className="empty-state">No cash accounts yet.</p>
+        ) : (
+          <ul className="row-list account-list">
+            {cash.map((a) => (
+              <li key={a.id}>
+                <span>{a.name}</span>
+                <Amount centavos={balances[a.id] ?? 0} />
+              </li>
+            ))}
+          </ul>
+        )}
       </Card>
 
       <Card>
         <h2>Credit</h2>
-        <ul className="account-list">
-          {credit.map((a) => (
-            <li key={a.id}>
-              <span>{a.name}</span>
-              <Amount centavos={balances[a.id] ?? 0} />
-            </li>
-          ))}
-        </ul>
+        {credit.length === 0 ? (
+          <p className="empty-state">No credit accounts yet.</p>
+        ) : (
+          <ul className="row-list account-list">
+            {credit.map((a) => (
+              <li key={a.id}>
+                <span>{a.name}</span>
+                <Amount centavos={balances[a.id] ?? 0} />
+              </li>
+            ))}
+          </ul>
+        )}
       </Card>
 
       <Sheet open={open} onClose={() => setOpen(false)} title="Add account">
@@ -124,13 +133,6 @@ export function AccountsScreen() {
           </Button>
         </form>
       </Sheet>
-
-      <style>{`
-        .vt { display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; gap:.5rem; }
-        .account-list { list-style:none; margin:0; padding:0; }
-        .account-list li { display:flex; justify-content:space-between; padding:.75rem 1rem; }
-        .card { margin-bottom: .75rem; }
-      `}</style>
-    </>
+    </div>
   )
 }

@@ -6,6 +6,7 @@ import { MoneyInput } from '../../ui/components/MoneyInput.tsx'
 import type { Centavos } from '../../domain/money.ts'
 import type { TransactionRow } from '../../storage/types.ts'
 import { temporal, isoDate } from '../../domain/dates.ts'
+import '../screens.css'
 
 function initialKind(
   row: TransactionRow | undefined,
@@ -245,7 +246,6 @@ export function TransactionForm({
           Delete transaction
         </Button>
       ) : null}
-      <style>{`.kind-switch{display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap}`}</style>
     </form>
   )
 }

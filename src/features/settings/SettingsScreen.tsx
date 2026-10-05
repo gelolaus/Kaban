@@ -15,6 +15,7 @@ import {
   backupReplaceSummary,
   parseBackupPayload,
 } from '../../storage/backupValidate.ts'
+import '../screens.css'
 
 function themeButtonName(pref: ThemePref, systemIsDark: boolean): string {
   const next = nextThemePref(pref, systemIsDark)
@@ -98,9 +99,9 @@ export function SettingsScreen() {
   }
 
   return (
-    <>
+    <div className="screen-stack">
       <h1 tabIndex={-1}>Settings</h1>
-      <section>
+      <section className="settings-section">
         <h2>Appearance</h2>
         <Button
           onClick={() => {
@@ -113,7 +114,7 @@ export function SettingsScreen() {
         </Button>
         <p className="ink-2">Color scheme: {colorSchemeContent(pref)}</p>
       </section>
-      <fieldset>
+      <fieldset className="settings-section">
         <legend>Density</legend>
         <label>
           <input
@@ -140,7 +141,7 @@ export function SettingsScreen() {
           Comfortable
         </label>
       </fieldset>
-      <section>
+      <section className="settings-section">
         <h2>Backup</h2>
         <Button onClick={() => void exportBackup()}>Export backup</Button>
         <label className="file-label">
@@ -158,6 +159,6 @@ export function SettingsScreen() {
         </label>
         <Button onClick={() => void removeData()}>Remove data from this device</Button>
       </section>
-    </>
+    </div>
   )
 }
