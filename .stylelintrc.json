@@ -10,7 +10,12 @@
     "at-rule-disallowed-list": ["import"],
     "declaration-property-value-disallowed-list": {
       "outline": ["none", "0"]
-    }
+    },
+    "color-hex-length": null,
+    "custom-property-empty-line-before": null,
+    "value-keyword-case": ["lower", { "ignoreKeywords": ["Georgia"] }],
+    "media-feature-range-notation": null,
+    "property-no-deprecated": null
   },
   "overrides": [
     {
