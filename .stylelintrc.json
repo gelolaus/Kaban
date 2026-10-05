@@ -1,0 +1,28 @@
+{
+  "extends": ["stylelint-config-standard"],
+  "rules": {
+    "declaration-property-unit-disallowed-list": {
+      "font-size": ["px"],
+      "line-height": ["px"]
+    },
+    "color-no-hex": true,
+    "selector-max-universal": 0,
+    "at-rule-disallowed-list": ["import"],
+    "declaration-property-value-disallowed-list": {
+      "outline": ["none", "0"]
+    },
+    "color-hex-length": null,
+    "custom-property-empty-line-before": null,
+    "value-keyword-case": ["lower", { "ignoreKeywords": ["Georgia"] }],
+    "media-feature-range-notation": null,
+    "property-no-deprecated": null
+  },
+  "overrides": [
+    {
+      "files": ["src/ui/tokens.css"],
+      "rules": {
+        "color-no-hex": null
+      }
+    }
+  ]
+}

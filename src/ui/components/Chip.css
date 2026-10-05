@@ -1,0 +1,25 @@
+@layer components {
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    border: 0;
+    border-radius: var(--radius-pill);
+    padding-inline: var(--space-3);
+    padding-block: var(--space-1);
+    background: var(--control);
+    color: var(--ink);
+    cursor: pointer;
+    min-block-size: 1.5rem;
+  }
+
+  .chip-on {
+    background: var(--highlight-bg);
+    color: var(--highlight-ink);
+  }
+
+  @media (pointer: coarse) {
+    .chip {
+      min-block-size: 2.75rem;
+    }
+  }
+}
