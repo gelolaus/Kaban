@@ -19,8 +19,18 @@
     color: var(--highlight-ink);
   }
 
+  /* Invert on highlight surfaces so primary stays readable */
+  :is(.plan-rta, .plan-phone-banner, .toast) .btn-primary {
+    background: var(--highlight-ink);
+    color: var(--highlight-bg);
+  }
+
   .btn-ghost {
     background: transparent;
+  }
+
+  :is(.plan-rta, .plan-phone-banner, .toast) .btn:not(.btn-primary) {
+    color: var(--highlight-ink);
   }
 
   @media (pointer: coarse) {

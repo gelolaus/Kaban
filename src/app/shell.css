@@ -4,7 +4,9 @@
     grid-template-columns: 13.75rem minmax(0, 1fr) 23.75rem;
     grid-template-areas: 'side main inspector';
     min-block-size: 100dvh;
+    max-inline-size: 100%;
     background: var(--bg);
+    overflow-x: clip;
   }
 
   .shell-side {
@@ -131,27 +133,34 @@
     .shell-tabs {
       display: flex;
       position: fixed;
-      inset-inline: 0.75rem;
-      inset-block-end: calc(0.75rem + env(safe-area-inset-bottom));
+      inset-inline: 0.5rem;
+      inset-block-end: calc(0.5rem + env(safe-area-inset-bottom));
       z-index: 50;
-      justify-content: space-around;
+      justify-content: space-between;
+      gap: 0;
       background: var(--surface);
       border: 1px solid var(--line);
       border-radius: 1.875rem;
       padding: var(--space-1);
+      max-inline-size: calc(100% - 1rem);
+      box-sizing: border-box;
     }
 
     .shell-tab {
       display: flex;
+      flex: 1 1 0;
       flex-direction: column;
       align-items: center;
       gap: 0.0625rem;
-      padding: var(--space-2);
+      padding: var(--space-2) 0.125rem;
       border-radius: 1.375rem;
       color: var(--ink-2);
       text-decoration: none;
       font-size: var(--fs-caption);
-      min-inline-size: 3.75rem;
+      min-inline-size: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .shell-tab[aria-current='page'] {
@@ -174,6 +183,8 @@
       padding: 0.875rem 1.125rem;
       font-weight: 500;
       cursor: pointer;
+      max-inline-size: calc(100% - 1.75rem);
+      box-sizing: border-box;
     }
   }
 }

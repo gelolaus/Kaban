@@ -10,13 +10,23 @@ import { applyDensity, readDensity, type Density } from '../../ui/density.ts'
 import { Button } from '../../ui/components/Button.tsx'
 import { useBudget } from '../../state/BudgetContext.tsx'
 import { showToast } from '../../ui/components/toast.ts'
-import type { BackupPayload } from '../../storage/types.ts'
+import {
+  BackupValidationError,
+  backupReplaceSummary,
+  parseBackupPayload,
+} from '../../storage/backupValidate.ts'
 
 function themeButtonName(pref: ThemePref, systemIsDark: boolean): string {
   const next = nextThemePref(pref, systemIsDark)
   if (next === 'system') return 'Use system theme'
   if (next === 'dark') return 'Use dark theme'
   return 'Use light theme'
+}
+
+function plainError(err: unknown): string {
+  if (err instanceof BackupValidationError) return err.message
+  if (err instanceof Error && err.message && !err.message.startsWith('Error:')) return err.message
+  return 'Could not import the backup.'
 }
 
 export function SettingsScreen() {
@@ -41,12 +51,42 @@ export function SettingsScreen() {
 
   async function importBackup(file: File) {
     if (!repo) return
-    const text = await file.text()
-    const payload = JSON.parse(text) as BackupPayload
-    if (payload.version !== 1) throw new Error('Unsupported backup version')
-    await repo.importBackup(payload)
-    await refresh()
-    showToast('Backup imported.')
+    let raw: unknown
+    try {
+      raw = JSON.parse(await file.text())
+    } catch {
+      showToast('Backup file is not valid JSON.', { kind: 'error' })
+      return
+    }
+
+    let payload
+    try {
+      payload = parseBackupPayload(raw)
+    } catch (err) {
+      showToast(plainError(err), { kind: 'error' })
+      return
+    }
+
+    const exportFirst = window.confirm(
+      'Export a backup of the current data first? Click OK to export, or Cancel to skip.',
+    )
+    if (exportFirst) {
+      await exportBackup()
+    }
+
+    const summary = backupReplaceSummary(payload)
+    const ok = window.confirm(
+      `Replace all data on this device with this backup (${summary})? This cannot be undone.`,
+    )
+    if (!ok) return
+
+    try {
+      await repo.importBackup(payload)
+      await refresh()
+      showToast('Backup imported.')
+    } catch (err) {
+      showToast(plainError(err), { kind: 'error' })
+    }
   }
 
   async function removeData() {
@@ -111,8 +151,8 @@ export function SettingsScreen() {
             className="visually-hidden"
             onChange={(e) => {
               const file = e.target.files?.[0]
-              if (file)
-                void importBackup(file).catch((err) => showToast(String(err), { kind: 'error' }))
+              if (file) void importBackup(file)
+              e.target.value = ''
             }}
           />
         </label>

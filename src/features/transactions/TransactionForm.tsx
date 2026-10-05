@@ -7,6 +7,16 @@ import type { Centavos } from '../../domain/money.ts'
 import type { TransactionRow } from '../../storage/types.ts'
 import { temporal, isoDate } from '../../domain/dates.ts'
 
+function initialKind(
+  row: TransactionRow | undefined,
+  fallback: 'outflow' | 'inflow' | 'transfer',
+): 'outflow' | 'inflow' | 'transfer' {
+  if (!row) return fallback
+  if (row.transfer_transaction_id) return 'transfer'
+  if (row.amount_centavos > 0 && !row.category_id) return 'inflow'
+  return 'outflow'
+}
+
 export function TransactionForm({
   initial,
   onSaved,
@@ -19,13 +29,22 @@ export function TransactionForm({
   defaultKind?: 'outflow' | 'inflow' | 'transfer'
 }) {
   const { data, repo } = useBudget()
-  const [kind, setKind] = useState<'outflow' | 'inflow' | 'transfer'>(defaultKind)
+  const [kind, setKind] = useState<'outflow' | 'inflow' | 'transfer'>(() =>
+    initialKind(initial, defaultKind),
+  )
   const [amount, setAmount] = useState<Centavos | null>(
     initial ? (Math.abs(initial.amount_centavos) as Centavos) : null,
   )
-  const [payee, setPayee] = useState('')
+  const [payee, setPayee] = useState(() => {
+    if (!initial?.payee_id || !data) return ''
+    return data.payees.find((p) => p.id === initial.payee_id)?.name ?? ''
+  })
   const [accountId, setAccountId] = useState(initial?.account_id ?? data?.accounts[0]?.id ?? '')
-  const [transferTo, setTransferTo] = useState('')
+  const [transferTo, setTransferTo] = useState(() => {
+    if (!initial?.transfer_transaction_id || !data) return ''
+    const other = data.transactions.find((t) => t.id === initial.transfer_transaction_id)
+    return other?.account_id ?? ''
+  })
   const [categoryId, setCategoryId] = useState(initial?.category_id ?? '')
   const [memo, setMemo] = useState(initial?.memo ?? '')
   const [date, setDate] = useState(initial?.date ?? isoDate(temporal().Now.plainDateISO()))
@@ -48,8 +67,10 @@ export function TransactionForm({
           amountCentavos: signed,
           memo: memo || null,
           cleared,
-          categoryId: kind === 'inflow' ? null : categoryId || null,
+          categoryId: kind === 'inflow' || kind === 'transfer' ? null : categoryId || null,
           accountId,
+          payeeName: payee || undefined,
+          transferAccountId: kind === 'transfer' ? transferTo : undefined,
         })
       } else {
         await repo.insertTransaction({
@@ -58,7 +79,7 @@ export function TransactionForm({
           amountCentavos: signed,
           memo: memo || null,
           cleared,
-          categoryId: kind === 'inflow' ? null : categoryId || null,
+          categoryId: kind === 'inflow' || kind === 'transfer' ? null : categoryId || null,
           payeeName: payee || (kind === 'transfer' ? 'Transfer' : 'Payee'),
           inflowToRta: kind === 'inflow',
           transferAccountId: kind === 'transfer' ? transferTo : undefined,
@@ -84,6 +105,7 @@ export function TransactionForm({
             type="button"
             variant={kind === k ? 'primary' : 'secondary'}
             onClick={() => setKind(k)}
+            disabled={!!initial && !!initial.transfer_transaction_id && k !== 'transfer'}
           >
             {k === 'outflow' ? 'Outflow' : k === 'inflow' ? 'Inflow' : 'Transfer'}
           </Button>

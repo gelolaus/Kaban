@@ -4,6 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="light dark" />
+    <!-- Establish cascade layer order before any Vite-injected component CSS. -->
+    <style>
+      @layer reset, base, tokens, components, utilities;
+    </style>
     <script>
       try {
         const v = localStorage.getItem('kaban:color-scheme')

@@ -213,6 +213,11 @@ export class BudgetRepository {
     return accounts.find((a) => a.id === id)!
   }
 
+  private async runTx<T>(fn: () => Promise<T>): Promise<T> {
+    const runner = this.db.transaction(fn)
+    return runner()
+  }
+
   async insertTransaction(input: {
     accountId: string
     date: string
@@ -233,47 +238,68 @@ export class BudgetRepository {
 
     const id = ulid()
     const categoryId = input.inflowToRta ? null : (input.categoryId ?? null)
-    const insert = await this.db.prepare(
-      `INSERT INTO transactions (id, budget_id, account_id, date, payee_id, category_id, memo, amount_centavos, cleared, approved, transfer_transaction_id, created_at, updated_at, deleted_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NULL, ?, ?, NULL)`,
-    )
-    await insert.run(
-      id,
-      this.budgetId,
-      input.accountId,
-      input.date,
-      payeeId,
-      categoryId,
-      input.memo ?? null,
-      input.amountCentavos,
-      input.cleared ?? 'uncleared',
-      ts,
-      ts,
-    )
 
     if (input.transferAccountId) {
       const otherId = ulid()
-      const other = await this.db.prepare(
+      const transferTo = input.transferAccountId
+      await this.runTx(async () => {
+        const insert = await this.db.prepare(
+          `INSERT INTO transactions (id, budget_id, account_id, date, payee_id, category_id, memo, amount_centavos, cleared, approved, transfer_transaction_id, created_at, updated_at, deleted_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NULL, ?, ?, NULL)`,
+        )
+        await insert.run(
+          id,
+          this.budgetId,
+          input.accountId,
+          input.date,
+          payeeId,
+          null,
+          input.memo ?? null,
+          input.amountCentavos,
+          input.cleared ?? 'uncleared',
+          ts,
+          ts,
+        )
+        const other = await this.db.prepare(
+          `INSERT INTO transactions (id, budget_id, account_id, date, payee_id, category_id, memo, amount_centavos, cleared, approved, transfer_transaction_id, created_at, updated_at, deleted_at)
+           VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, 1, ?, ?, ?, NULL)`,
+        )
+        await other.run(
+          otherId,
+          this.budgetId,
+          transferTo,
+          input.date,
+          payeeId,
+          input.memo ?? null,
+          -input.amountCentavos,
+          input.cleared ?? 'uncleared',
+          id,
+          ts,
+          ts,
+        )
+        const link = await this.db.prepare(
+          `UPDATE transactions SET transfer_transaction_id = ?, updated_at = ? WHERE id = ?`,
+        )
+        await link.run(otherId, ts, id)
+      })
+    } else {
+      const insert = await this.db.prepare(
         `INSERT INTO transactions (id, budget_id, account_id, date, payee_id, category_id, memo, amount_centavos, cleared, approved, transfer_transaction_id, created_at, updated_at, deleted_at)
-         VALUES (?, ?, ?, ?, ?, NULL, ?, ?, ?, 1, ?, ?, ?, NULL)`,
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, NULL, ?, ?, NULL)`,
       )
-      await other.run(
-        otherId,
+      await insert.run(
+        id,
         this.budgetId,
-        input.transferAccountId,
+        input.accountId,
         input.date,
         payeeId,
+        categoryId,
         input.memo ?? null,
-        -input.amountCentavos,
+        input.amountCentavos,
         input.cleared ?? 'uncleared',
-        id,
         ts,
         ts,
       )
-      const link = await this.db.prepare(
-        `UPDATE transactions SET transfer_transaction_id = ?, updated_at = ? WHERE id = ?`,
-      )
-      await link.run(otherId, ts, id)
     }
 
     const rows = await this.listTransactions()
@@ -289,38 +315,59 @@ export class BudgetRepository {
       cleared: TransactionRow['cleared']
       categoryId: string | null
       payeeId: string | null
+      payeeName: string
       accountId: string
+      transferAccountId: string
     }>,
   ): Promise<void> {
     const ts = now()
     const current = (await this.listTransactions()).find((t) => t.id === id)
     if (!current) return
+
+    let payeeId = patch.payeeId === undefined ? current.payee_id : patch.payeeId
+    if (patch.payeeName) {
+      payeeId = await this.ensurePayee(patch.payeeName, patch.transferAccountId)
+    }
+
+    const date = patch.date ?? current.date
+    const amount = patch.amountCentavos ?? current.amount_centavos
+    const memo = patch.memo === undefined ? current.memo : patch.memo
+    const cleared = patch.cleared ?? current.cleared
+    const categoryId = patch.categoryId === undefined ? current.category_id : patch.categoryId
+    const accountId = patch.accountId ?? current.account_id
+
+    if (current.transfer_transaction_id) {
+      const otherId = current.transfer_transaction_id
+      const other = (await this.listTransactions()).find((t) => t.id === otherId)
+      const otherAccountId = patch.transferAccountId ?? other?.account_id ?? accountId
+      await this.runTx(async () => {
+        const upd = await this.db.prepare(
+          `UPDATE transactions SET date = ?, amount_centavos = ?, memo = ?, cleared = ?, category_id = ?, payee_id = ?, account_id = ?, updated_at = ? WHERE id = ?`,
+        )
+        await upd.run(date, amount, memo, cleared, null, payeeId, accountId, ts, id)
+        await upd.run(date, -amount, memo, cleared, null, payeeId, otherAccountId, ts, otherId)
+      })
+      return
+    }
+
     const upd = await this.db.prepare(
       `UPDATE transactions SET date = ?, amount_centavos = ?, memo = ?, cleared = ?, category_id = ?, payee_id = ?, account_id = ?, updated_at = ? WHERE id = ?`,
     )
-    await upd.run(
-      patch.date ?? current.date,
-      patch.amountCentavos ?? current.amount_centavos,
-      patch.memo === undefined ? current.memo : patch.memo,
-      patch.cleared ?? current.cleared,
-      patch.categoryId === undefined ? current.category_id : patch.categoryId,
-      patch.payeeId === undefined ? current.payee_id : patch.payeeId,
-      patch.accountId ?? current.account_id,
-      ts,
-      id,
-    )
+    await upd.run(date, amount, memo, cleared, categoryId, payeeId, accountId, ts, id)
   }
 
   async deleteTransaction(id: string): Promise<void> {
     const ts = now()
     const current = (await this.listTransactions()).find((t) => t.id === id)
-    const soft = await this.db.prepare(
-      `UPDATE transactions SET deleted_at = ?, updated_at = ? WHERE id = ? OR transfer_transaction_id = ?`,
-    )
-    await soft.run(ts, ts, id, id)
-    if (current?.transfer_transaction_id) {
-      await soft.run(ts, ts, current.transfer_transaction_id, current.transfer_transaction_id)
-    }
+    await this.runTx(async () => {
+      const soft = await this.db.prepare(
+        `UPDATE transactions SET deleted_at = ?, updated_at = ? WHERE id = ? OR transfer_transaction_id = ?`,
+      )
+      await soft.run(ts, ts, id, id)
+      if (current?.transfer_transaction_id) {
+        await soft.run(ts, ts, current.transfer_transaction_id, current.transfer_transaction_id)
+      }
+    })
   }
 
   async assign(categoryId: string, month: string, newAssignedCentavos: number): Promise<void> {
@@ -332,11 +379,13 @@ export class BudgetRepository {
     if (delta === 0) return
     const ts = now()
     const id = ulid()
-    const ins = await this.db.prepare(
-      `INSERT INTO assignment_entries (id, budget_id, category_id, month, delta_centavos, move_id, created_at, updated_at, deleted_at)
-       VALUES (?, ?, ?, ?, ?, NULL, ?, ?, NULL)`,
-    )
-    await ins.run(id, this.budgetId, categoryId, month, delta, ts, ts)
+    await this.runTx(async () => {
+      const ins = await this.db.prepare(
+        `INSERT INTO assignment_entries (id, budget_id, category_id, month, delta_centavos, move_id, created_at, updated_at, deleted_at)
+         VALUES (?, ?, ?, ?, ?, NULL, ?, ?, NULL)`,
+      )
+      await ins.run(id, this.budgetId, categoryId, month, delta, ts, ts)
+    })
   }
 
   async createCategoryGroup(name: string): Promise<CategoryGroupRow> {
@@ -442,9 +491,8 @@ export class BudgetRepository {
   }
 
   async importBackup(payload: BackupPayload): Promise<void> {
-    // Soft-delete current then insert
     const ts = now()
-    for (const table of [
+    const softDeleteTables = [
       'pins',
       'assignment_entries',
       'transactions',
@@ -452,125 +500,127 @@ export class BudgetRepository {
       'categories',
       'category_groups',
       'accounts',
-    ]) {
-      await this.db.exec(
-        `UPDATE ${table} SET deleted_at = '${ts}', updated_at = '${ts}' WHERE budget_id = '${this.budgetId}' AND deleted_at IS NULL`,
+    ] as const satisfies readonly SoftDeleteTable[]
+
+    await this.runTx(async () => {
+      for (const table of softDeleteTables) {
+        await softDeleteBudgetRows(this.db, table, this.budgetId, ts)
+      }
+
+      const insertAll = async (sql: string, rows: unknown[][]) => {
+        const stmt = await this.db.prepare(sql)
+        for (const row of rows) await stmt.run(...row)
+      }
+
+      await insertAll(
+        `INSERT OR REPLACE INTO accounts (id, budget_id, name, type, on_budget, closed, sort_order, note, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        payload.accounts.map((a) => [
+          a.id,
+          this.budgetId,
+          a.name,
+          a.type,
+          a.on_budget,
+          a.closed,
+          a.sort_order,
+          a.note,
+          a.created_at,
+          a.updated_at,
+          a.deleted_at,
+        ]),
       )
-    }
-
-    const insertAll = async (sql: string, rows: unknown[][]) => {
-      const stmt = await this.db.prepare(sql)
-      for (const row of rows) await stmt.run(...row)
-    }
-
-    await insertAll(
-      `INSERT OR REPLACE INTO accounts (id, budget_id, name, type, on_budget, closed, sort_order, note, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      payload.accounts.map((a) => [
-        a.id,
-        this.budgetId,
-        a.name,
-        a.type,
-        a.on_budget,
-        a.closed,
-        a.sort_order,
-        a.note,
-        a.created_at,
-        a.updated_at,
-        a.deleted_at,
-      ]),
-    )
-    await insertAll(
-      `INSERT OR REPLACE INTO category_groups (id, budget_id, name, sort_order, hidden, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      payload.categoryGroups.map((g) => [
-        g.id,
-        this.budgetId,
-        g.name,
-        g.sort_order,
-        g.hidden,
-        g.created_at,
-        g.updated_at,
-        g.deleted_at,
-      ]),
-    )
-    await insertAll(
-      `INSERT OR REPLACE INTO categories (id, budget_id, group_id, name, sort_order, hidden, note, kind, account_id, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      payload.categories.map((c) => [
-        c.id,
-        this.budgetId,
-        c.group_id,
-        c.name,
-        c.sort_order,
-        c.hidden,
-        c.note,
-        c.kind,
-        c.account_id,
-        c.created_at,
-        c.updated_at,
-        c.deleted_at,
-      ]),
-    )
-    await insertAll(
-      `INSERT OR REPLACE INTO payees (id, budget_id, name, transfer_account_id, last_category_id, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      payload.payees.map((p) => [
-        p.id,
-        this.budgetId,
-        p.name,
-        p.transfer_account_id,
-        p.last_category_id,
-        p.created_at,
-        p.updated_at,
-        p.deleted_at,
-      ]),
-    )
-    await insertAll(
-      `INSERT OR REPLACE INTO transactions (id, budget_id, account_id, date, payee_id, category_id, memo, amount_centavos, cleared, approved, transfer_transaction_id, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      payload.transactions.map((t) => [
-        t.id,
-        this.budgetId,
-        t.account_id,
-        t.date,
-        t.payee_id,
-        t.category_id,
-        t.memo,
-        t.amount_centavos,
-        t.cleared,
-        t.approved,
-        t.transfer_transaction_id,
-        t.created_at,
-        t.updated_at,
-        t.deleted_at,
-      ]),
-    )
-    await insertAll(
-      `INSERT OR REPLACE INTO assignment_entries (id, budget_id, category_id, month, delta_centavos, move_id, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      payload.assignments.map((a) => [
-        a.id,
-        this.budgetId,
-        a.category_id,
-        a.month,
-        a.delta_centavos,
-        a.move_id,
-        a.created_at,
-        a.updated_at,
-        a.deleted_at,
-      ]),
-    )
-    await insertAll(
-      `INSERT OR REPLACE INTO pins (id, budget_id, category_id, sort_order, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      payload.pins.map((p) => [
-        p.id,
-        this.budgetId,
-        p.category_id,
-        p.sort_order,
-        p.created_at,
-        p.updated_at,
-        p.deleted_at,
-      ]),
-    )
+      await insertAll(
+        `INSERT OR REPLACE INTO category_groups (id, budget_id, name, sort_order, hidden, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        payload.categoryGroups.map((g) => [
+          g.id,
+          this.budgetId,
+          g.name,
+          g.sort_order,
+          g.hidden,
+          g.created_at,
+          g.updated_at,
+          g.deleted_at,
+        ]),
+      )
+      await insertAll(
+        `INSERT OR REPLACE INTO categories (id, budget_id, group_id, name, sort_order, hidden, note, kind, account_id, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        payload.categories.map((c) => [
+          c.id,
+          this.budgetId,
+          c.group_id,
+          c.name,
+          c.sort_order,
+          c.hidden,
+          c.note,
+          c.kind,
+          c.account_id,
+          c.created_at,
+          c.updated_at,
+          c.deleted_at,
+        ]),
+      )
+      await insertAll(
+        `INSERT OR REPLACE INTO payees (id, budget_id, name, transfer_account_id, last_category_id, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        payload.payees.map((p) => [
+          p.id,
+          this.budgetId,
+          p.name,
+          p.transfer_account_id,
+          p.last_category_id,
+          p.created_at,
+          p.updated_at,
+          p.deleted_at,
+        ]),
+      )
+      await insertAll(
+        `INSERT OR REPLACE INTO transactions (id, budget_id, account_id, date, payee_id, category_id, memo, amount_centavos, cleared, approved, transfer_transaction_id, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        payload.transactions.map((t) => [
+          t.id,
+          this.budgetId,
+          t.account_id,
+          t.date,
+          t.payee_id,
+          t.category_id,
+          t.memo,
+          t.amount_centavos,
+          t.cleared,
+          t.approved,
+          t.transfer_transaction_id,
+          t.created_at,
+          t.updated_at,
+          t.deleted_at,
+        ]),
+      )
+      await insertAll(
+        `INSERT OR REPLACE INTO assignment_entries (id, budget_id, category_id, month, delta_centavos, move_id, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        payload.assignments.map((a) => [
+          a.id,
+          this.budgetId,
+          a.category_id,
+          a.month,
+          a.delta_centavos,
+          a.move_id,
+          a.created_at,
+          a.updated_at,
+          a.deleted_at,
+        ]),
+      )
+      await insertAll(
+        `INSERT OR REPLACE INTO pins (id, budget_id, category_id, sort_order, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        payload.pins.map((p) => [
+          p.id,
+          this.budgetId,
+          p.category_id,
+          p.sort_order,
+          p.created_at,
+          p.updated_at,
+          p.deleted_at,
+        ]),
+      )
+    })
   }
 
   async clearAllData(): Promise<void> {
-    for (const table of [
+    const tables = [
       'pins',
       'assignment_entries',
       'transactions',
@@ -581,8 +631,52 @@ export class BudgetRepository {
       'month_notes',
       'budgets',
       'meta',
-    ]) {
-      await this.db.exec(`DELETE FROM ${table}`)
-    }
+    ] as const satisfies readonly ClearTable[]
+    await this.runTx(async () => {
+      for (const table of tables) {
+        await clearTable(this.db, table)
+      }
+    })
   }
+}
+
+const SOFT_DELETE_SQL = {
+  pins: `UPDATE pins SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
+  assignment_entries: `UPDATE assignment_entries SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
+  transactions: `UPDATE transactions SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
+  payees: `UPDATE payees SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
+  categories: `UPDATE categories SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
+  category_groups: `UPDATE category_groups SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
+  accounts: `UPDATE accounts SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
+} as const
+
+type SoftDeleteTable = keyof typeof SOFT_DELETE_SQL
+
+const CLEAR_SQL = {
+  pins: `DELETE FROM pins`,
+  assignment_entries: `DELETE FROM assignment_entries`,
+  transactions: `DELETE FROM transactions`,
+  payees: `DELETE FROM payees`,
+  categories: `DELETE FROM categories`,
+  category_groups: `DELETE FROM category_groups`,
+  accounts: `DELETE FROM accounts`,
+  month_notes: `DELETE FROM month_notes`,
+  budgets: `DELETE FROM budgets`,
+  meta: `DELETE FROM meta`,
+} as const
+
+type ClearTable = keyof typeof CLEAR_SQL
+
+async function softDeleteBudgetRows(
+  db: Db,
+  table: SoftDeleteTable,
+  budgetId: string,
+  ts: string,
+): Promise<void> {
+  const stmt = await db.prepare(SOFT_DELETE_SQL[table])
+  await stmt.run(ts, ts, budgetId)
+}
+
+async function clearTable(db: Db, table: ClearTable): Promise<void> {
+  await db.exec(CLEAR_SQL[table])
 }

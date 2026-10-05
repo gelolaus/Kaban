@@ -5,7 +5,6 @@
 
   button {
     font: inherit;
-    color: inherit;
   }
 
   input,
@@ -35,6 +34,11 @@
     font-display: swap;
   }
 
+  html {
+    max-inline-size: 100%;
+    overflow-x: clip;
+  }
+
   body {
     background: var(--bg);
     color: var(--ink);
@@ -43,6 +47,8 @@
     accent-color: var(--ink);
     scrollbar-color: var(--ink-2) var(--track);
     scrollbar-width: thin;
+    max-inline-size: 100%;
+    overflow-x: clip;
   }
 
   :focus-visible {
