@@ -623,6 +623,10 @@ export class BudgetRepository {
     const tables = [
       'pins',
       'assignment_entries',
+      'moves',
+      'target_snoozes',
+      'targets',
+      'budget_settings',
       'transactions',
       'payees',
       'categories',
@@ -655,6 +659,10 @@ type SoftDeleteTable = keyof typeof SOFT_DELETE_SQL
 const CLEAR_SQL = {
   pins: `DELETE FROM pins`,
   assignment_entries: `DELETE FROM assignment_entries`,
+  moves: `DELETE FROM moves`,
+  target_snoozes: `DELETE FROM target_snoozes`,
+  targets: `DELETE FROM targets`,
+  budget_settings: `DELETE FROM budget_settings`,
   transactions: `DELETE FROM transactions`,
   payees: `DELETE FROM payees`,
   categories: `DELETE FROM categories`,
