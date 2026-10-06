@@ -99,7 +99,60 @@ export interface PinRow {
   deleted_at: string | null
 }
 
-export interface BackupPayload {
+export type TargetCadence = 'weekly' | 'monthly' | 'yearly' | 'custom'
+export type TargetBehavior = 'set_aside' | 'refill' | 'balance'
+export type TargetRepeat = 'none' | 'monthly' | 'yearly'
+export type MoveKind = 'assign' | 'move' | 'auto_assign' | 'cover' | 'delete_category'
+
+export interface TargetRow {
+  id: string
+  budget_id: string
+  category_id: string
+  cadence: TargetCadence
+  behavior: TargetBehavior
+  amount_centavos: number
+  weekday: number | null
+  due_day: string | null
+  due_month: string | null
+  repeat: TargetRepeat | null
+  repeat_behavior: 'set_aside' | 'refill' | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface TargetSnoozeRow {
+  id: string
+  budget_id: string
+  category_id: string
+  month: string
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface MoveRow {
+  id: string
+  budget_id: string
+  kind: MoveKind
+  month: string
+  undone_at: string | null
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export interface BudgetSettingRow {
+  id: string
+  budget_id: string
+  key: string
+  value: string
+  created_at: string
+  updated_at: string
+  deleted_at: string | null
+}
+
+export type BackupPayloadV1 = {
   version: 1
   exportedAt: string
   budgets: BudgetRow[]
@@ -111,3 +164,22 @@ export interface BackupPayload {
   assignments: AssignmentRow[]
   pins: PinRow[]
 }
+
+export type BackupPayloadV2 = {
+  version: 2
+  exportedAt: string
+  budgets: BudgetRow[]
+  accounts: AccountRow[]
+  categoryGroups: CategoryGroupRow[]
+  categories: CategoryRow[]
+  payees: PayeeRow[]
+  transactions: TransactionRow[]
+  assignments: AssignmentRow[]
+  pins: PinRow[]
+  targets: TargetRow[]
+  targetSnoozes: TargetSnoozeRow[]
+  moves: MoveRow[]
+  settings: BudgetSettingRow[]
+}
+
+export type BackupPayload = BackupPayloadV1 | BackupPayloadV2

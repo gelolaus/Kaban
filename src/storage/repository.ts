@@ -6,10 +6,18 @@ import type {
   AssignmentRow,
   BackupPayload,
   BudgetRow,
+  BudgetSettingRow,
   CategoryGroupRow,
   CategoryRow,
+  MoveKind,
+  MoveRow,
   PayeeRow,
   PinRow,
+  TargetBehavior,
+  TargetCadence,
+  TargetRepeat,
+  TargetRow,
+  TargetSnoozeRow,
   TransactionRow,
 } from './types.ts'
 
@@ -116,6 +124,60 @@ export class BudgetRepository {
       `SELECT * FROM pins WHERE budget_id = ? AND deleted_at IS NULL ORDER BY sort_order`,
     )
     return (await stmt.all(this.budgetId)) as PinRow[]
+  }
+
+  async listTargets(): Promise<TargetRow[]> {
+    const stmt = await this.db.prepare(
+      `SELECT * FROM targets WHERE budget_id = ? AND deleted_at IS NULL`,
+    )
+    return (await stmt.all(this.budgetId)) as TargetRow[]
+  }
+
+  async listTargetSnoozes(): Promise<TargetSnoozeRow[]> {
+    const stmt = await this.db.prepare(
+      `SELECT * FROM target_snoozes WHERE budget_id = ? AND deleted_at IS NULL`,
+    )
+    return (await stmt.all(this.budgetId)) as TargetSnoozeRow[]
+  }
+
+  async listMoves(): Promise<MoveRow[]> {
+    const stmt = await this.db.prepare(
+      `SELECT * FROM moves WHERE budget_id = ? AND deleted_at IS NULL ORDER BY created_at DESC`,
+    )
+    return (await stmt.all(this.budgetId)) as MoveRow[]
+  }
+
+  async listSettings(): Promise<BudgetSettingRow[]> {
+    const stmt = await this.db.prepare(
+      `SELECT * FROM budget_settings WHERE budget_id = ? AND deleted_at IS NULL`,
+    )
+    return (await stmt.all(this.budgetId)) as BudgetSettingRow[]
+  }
+
+  async getSetting(key: string): Promise<string | null> {
+    const stmt = await this.db.prepare(
+      `SELECT value FROM budget_settings WHERE budget_id = ? AND key = ? AND deleted_at IS NULL`,
+    )
+    const row = (await stmt.get(this.budgetId, key)) as { value: string } | undefined
+    return row?.value ?? null
+  }
+
+  async setSetting(key: string, value: string): Promise<void> {
+    const ts = now()
+    const existing = (await this.listSettings()).find((s) => s.key === key)
+    if (existing) {
+      const upd = await this.db.prepare(
+        `UPDATE budget_settings SET value = ?, updated_at = ? WHERE id = ?`,
+      )
+      await upd.run(value, ts, existing.id)
+      return
+    }
+    const id = ulid()
+    const ins = await this.db.prepare(
+      `INSERT INTO budget_settings (id, budget_id, key, value, created_at, updated_at, deleted_at)
+       VALUES (?, ?, ?, ?, ?, ?, NULL)`,
+    )
+    await ins.run(id, this.budgetId, key, value, ts, ts)
   }
 
   async pinCategory(categoryId: string): Promise<void> {
@@ -377,15 +439,199 @@ export class BudgetRepository {
     const current = entries.reduce((s, e) => s + e.delta_centavos, 0)
     const delta = newAssignedCentavos - current
     if (delta === 0) return
+    await this.recordMove('assign', month, [{ categoryId, deltaCentavos: delta }])
+  }
+
+  async recordMove(
+    kind: MoveKind,
+    month: string,
+    deltas: { categoryId: string; deltaCentavos: number }[],
+  ): Promise<string> {
+    const ts = now()
+    const moveId = ulid()
+    await this.runTx(async () => {
+      const moveIns = await this.db.prepare(
+        `INSERT INTO moves (id, budget_id, kind, month, undone_at, created_at, updated_at, deleted_at)
+         VALUES (?, ?, ?, ?, NULL, ?, ?, NULL)`,
+      )
+      await moveIns.run(moveId, this.budgetId, kind, month, ts, ts)
+      const asgIns = await this.db.prepare(
+        `INSERT INTO assignment_entries (id, budget_id, category_id, month, delta_centavos, move_id, created_at, updated_at, deleted_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
+      )
+      for (const d of deltas) {
+        if (d.deltaCentavos === 0) continue
+        await asgIns.run(
+          ulid(),
+          this.budgetId,
+          d.categoryId,
+          month,
+          d.deltaCentavos,
+          moveId,
+          ts,
+          ts,
+        )
+      }
+    })
+    return moveId
+  }
+
+  async upsertTarget(input: {
+    categoryId: string
+    cadence: TargetCadence
+    behavior: TargetBehavior
+    amountCentavos: number
+    weekday?: number | null
+    dueDay?: number | 'end' | null
+    dueMonth?: string | null
+    repeat?: TargetRepeat | null
+    repeatBehavior?: 'set_aside' | 'refill' | null
+  }): Promise<TargetRow> {
+    const ts = now()
+    const dueDay =
+      input.dueDay === undefined || input.dueDay === null
+        ? null
+        : input.dueDay === 'end'
+          ? 'end'
+          : String(input.dueDay)
+    const existing = (await this.listTargets()).find((t) => t.category_id === input.categoryId)
+    if (existing) {
+      const upd = await this.db.prepare(
+        `UPDATE targets SET cadence = ?, behavior = ?, amount_centavos = ?, weekday = ?, due_day = ?,
+         due_month = ?, repeat = ?, repeat_behavior = ?, updated_at = ? WHERE id = ?`,
+      )
+      await upd.run(
+        input.cadence,
+        input.behavior,
+        input.amountCentavos,
+        input.weekday ?? null,
+        dueDay,
+        input.dueMonth ?? null,
+        input.repeat ?? null,
+        input.repeatBehavior ?? null,
+        ts,
+        existing.id,
+      )
+      return (await this.listTargets()).find((t) => t.id === existing.id)!
+    }
+    const id = ulid()
+    const ins = await this.db.prepare(
+      `INSERT INTO targets (id, budget_id, category_id, cadence, behavior, amount_centavos, weekday, due_day, due_month, repeat, repeat_behavior, created_at, updated_at, deleted_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)`,
+    )
+    await ins.run(
+      id,
+      this.budgetId,
+      input.categoryId,
+      input.cadence,
+      input.behavior,
+      input.amountCentavos,
+      input.weekday ?? null,
+      dueDay,
+      input.dueMonth ?? null,
+      input.repeat ?? null,
+      input.repeatBehavior ?? null,
+      ts,
+      ts,
+    )
+    return (await this.listTargets()).find((t) => t.id === id)!
+  }
+
+  async deleteTarget(categoryId: string): Promise<void> {
+    const ts = now()
+    const soft = await this.db.prepare(
+      `UPDATE targets SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND category_id = ? AND deleted_at IS NULL`,
+    )
+    await soft.run(ts, ts, this.budgetId, categoryId)
+  }
+
+  async snoozeTarget(categoryId: string, month: string): Promise<void> {
+    const existing = (await this.listTargetSnoozes()).find(
+      (s) => s.category_id === categoryId && s.month === month,
+    )
+    if (existing) return
     const ts = now()
     const id = ulid()
+    const ins = await this.db.prepare(
+      `INSERT INTO target_snoozes (id, budget_id, category_id, month, created_at, updated_at, deleted_at)
+       VALUES (?, ?, ?, ?, ?, ?, NULL)`,
+    )
+    await ins.run(id, this.budgetId, categoryId, month, ts, ts)
+  }
+
+  async unsnoozeTarget(categoryId: string, month: string): Promise<void> {
+    const ts = now()
+    const soft = await this.db.prepare(
+      `UPDATE target_snoozes SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND category_id = ? AND month = ? AND deleted_at IS NULL`,
+    )
+    await soft.run(ts, ts, this.budgetId, categoryId, month)
+  }
+
+  /** Most recent non-undone move, if any. */
+  async canUndo(): Promise<boolean> {
+    const moves = await this.listMoves()
+    return moves.some((m) => m.undone_at === null)
+  }
+
+  /** Redo only while the latest move is undone and nothing newer exists. */
+  async canRedo(): Promise<boolean> {
+    const moves = await this.listMoves()
+    const latest = moves[0]
+    return latest !== undefined && latest.undone_at !== null
+  }
+
+  async undoLastMove(): Promise<boolean> {
+    const moves = await this.listMoves()
+    const target = moves.find((m) => m.undone_at === null)
+    if (!target) return false
+    const ts = now()
     await this.runTx(async () => {
-      const ins = await this.db.prepare(
-        `INSERT INTO assignment_entries (id, budget_id, category_id, month, delta_centavos, move_id, created_at, updated_at, deleted_at)
-         VALUES (?, ?, ?, ?, ?, NULL, ?, ?, NULL)`,
+      const soft = await this.db.prepare(
+        `UPDATE assignment_entries SET deleted_at = ?, updated_at = ? WHERE move_id = ? AND deleted_at IS NULL`,
       )
-      await ins.run(id, this.budgetId, categoryId, month, delta, ts, ts)
+      await soft.run(ts, ts, target.id)
+      const upd = await this.db.prepare(
+        `UPDATE moves SET undone_at = ?, updated_at = ? WHERE id = ?`,
+      )
+      await upd.run(ts, ts, target.id)
     })
+    return true
+  }
+
+  async redoLastMove(): Promise<boolean> {
+    if (!(await this.canRedo())) return false
+    const moves = await this.listMoves()
+    const target = moves[0]!
+    const ts = now()
+    await this.runTx(async () => {
+      const restore = await this.db.prepare(
+        `UPDATE assignment_entries SET deleted_at = NULL, updated_at = ? WHERE move_id = ?`,
+      )
+      await restore.run(ts, target.id)
+      const upd = await this.db.prepare(
+        `UPDATE moves SET undone_at = NULL, updated_at = ? WHERE id = ?`,
+      )
+      await upd.run(ts, target.id)
+    })
+    return true
+  }
+
+  async listRecentMoves(sinceIso: string): Promise<Array<MoveRow & { entries: AssignmentRow[] }>> {
+    const moves = (await this.listMoves()).filter((m) => m.created_at >= sinceIso)
+    return Promise.all(
+      moves.map(async (m) => ({
+        ...m,
+        entries: await this.listAssignmentsForMove(m.id),
+      })),
+    )
+  }
+
+  /** All assignment rows for a move (including soft-deleted after undo). */
+  async listAssignmentsForMove(moveId: string): Promise<AssignmentRow[]> {
+    const stmt = await this.db.prepare(
+      `SELECT * FROM assignment_entries WHERE budget_id = ? AND move_id = ?`,
+    )
+    return (await stmt.all(this.budgetId, moveId)) as AssignmentRow[]
   }
 
   async createCategoryGroup(name: string): Promise<CategoryGroupRow> {
@@ -416,6 +662,12 @@ export class BudgetRepository {
     const ts = now()
     const upd = await this.db.prepare(`UPDATE categories SET name = ?, updated_at = ? WHERE id = ?`)
     await upd.run(name, ts, id)
+  }
+
+  async setCategoryNote(id: string, note: string | null): Promise<void> {
+    const ts = now()
+    const upd = await this.db.prepare(`UPDATE categories SET note = ?, updated_at = ? WHERE id = ?`)
+    await upd.run(note, ts, id)
   }
 
   async renameCategoryGroup(id: string, name: string): Promise<void> {
@@ -477,7 +729,7 @@ export class BudgetRepository {
 
   async exportBackup(): Promise<BackupPayload> {
     return {
-      version: 1,
+      version: 2,
       exportedAt: now(),
       budgets: [await this.getBudget()],
       accounts: await this.listAccounts(),
@@ -487,6 +739,10 @@ export class BudgetRepository {
       transactions: await this.listTransactions(),
       assignments: await this.listAssignments(),
       pins: await this.listPins(),
+      targets: await this.listTargets(),
+      targetSnoozes: await this.listTargetSnoozes(),
+      moves: await this.listMoves(),
+      settings: await this.listSettings(),
     }
   }
 
@@ -495,12 +751,21 @@ export class BudgetRepository {
     const softDeleteTables = [
       'pins',
       'assignment_entries',
+      'moves',
+      'target_snoozes',
+      'targets',
+      'budget_settings',
       'transactions',
       'payees',
       'categories',
       'category_groups',
       'accounts',
     ] as const satisfies readonly SoftDeleteTable[]
+
+    const targets = payload.version === 2 ? payload.targets : []
+    const targetSnoozes = payload.version === 2 ? payload.targetSnoozes : []
+    const moves = payload.version === 2 ? payload.moves : []
+    const settings = payload.version === 2 ? payload.settings : []
 
     await this.runTx(async () => {
       for (const table of softDeleteTables) {
@@ -616,6 +881,62 @@ export class BudgetRepository {
           p.deleted_at,
         ]),
       )
+      await insertAll(
+        `INSERT OR REPLACE INTO targets (id, budget_id, category_id, cadence, behavior, amount_centavos, weekday, due_day, due_month, repeat, repeat_behavior, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        targets.map((t) => [
+          t.id,
+          this.budgetId,
+          t.category_id,
+          t.cadence,
+          t.behavior,
+          t.amount_centavos,
+          t.weekday,
+          t.due_day,
+          t.due_month,
+          t.repeat,
+          t.repeat_behavior,
+          t.created_at,
+          t.updated_at,
+          t.deleted_at,
+        ]),
+      )
+      await insertAll(
+        `INSERT OR REPLACE INTO target_snoozes (id, budget_id, category_id, month, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        targetSnoozes.map((s) => [
+          s.id,
+          this.budgetId,
+          s.category_id,
+          s.month,
+          s.created_at,
+          s.updated_at,
+          s.deleted_at,
+        ]),
+      )
+      await insertAll(
+        `INSERT OR REPLACE INTO moves (id, budget_id, kind, month, undone_at, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        moves.map((m) => [
+          m.id,
+          this.budgetId,
+          m.kind,
+          m.month,
+          m.undone_at,
+          m.created_at,
+          m.updated_at,
+          m.deleted_at,
+        ]),
+      )
+      await insertAll(
+        `INSERT OR REPLACE INTO budget_settings (id, budget_id, key, value, created_at, updated_at, deleted_at) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        settings.map((s) => [
+          s.id,
+          this.budgetId,
+          s.key,
+          s.value,
+          s.created_at,
+          s.updated_at,
+          s.deleted_at,
+        ]),
+      )
     })
   }
 
@@ -647,6 +968,10 @@ export class BudgetRepository {
 const SOFT_DELETE_SQL = {
   pins: `UPDATE pins SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
   assignment_entries: `UPDATE assignment_entries SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
+  moves: `UPDATE moves SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
+  target_snoozes: `UPDATE target_snoozes SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
+  targets: `UPDATE targets SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
+  budget_settings: `UPDATE budget_settings SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
   transactions: `UPDATE transactions SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
   payees: `UPDATE payees SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,
   categories: `UPDATE categories SET deleted_at = ?, updated_at = ? WHERE budget_id = ? AND deleted_at IS NULL`,

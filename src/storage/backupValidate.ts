@@ -58,18 +58,7 @@ function collectUniqueIds(ids: string[], label: string): void {
   }
 }
 
-/** Validate unknown JSON as a BackupPayload without mutating storage. */
-export function parseBackupPayload(raw: unknown): BackupPayload {
-  if (!isRecord(raw)) {
-    throw new BackupValidationError('Backup file is not a JSON object.')
-  }
-  if (raw.version !== 1) {
-    throw new BackupValidationError('Unsupported backup version.')
-  }
-  if (typeof raw.exportedAt !== 'string' || raw.exportedAt.length === 0) {
-    throw new BackupValidationError('Backup is missing exportedAt.')
-  }
-
+function validateCoreLists(raw: Record<string, unknown>): void {
   const budgets = requireArray(raw, 'budgets')
   const accounts = requireArray(raw, 'accounts')
   const categoryGroups = requireArray(raw, 'categoryGroups')
@@ -140,15 +129,71 @@ export function parseBackupPayload(raw: unknown): BackupPayload {
     pinIds.push(requireId(row.id, `Pin ${i + 1}`))
   }
   collectUniqueIds(pinIds, 'pin')
+}
+
+function validateV2Extras(raw: Record<string, unknown>): void {
+  const targets = requireArray(raw, 'targets')
+  const targetSnoozes = requireArray(raw, 'targetSnoozes')
+  const moves = requireArray(raw, 'moves')
+  const settings = requireArray(raw, 'settings')
+
+  const targetIds: string[] = []
+  for (const [i, row] of targets.entries()) {
+    if (!isRecord(row)) throw new BackupValidationError(`Target ${i + 1} is invalid.`)
+    targetIds.push(requireId(row.id, `Target ${i + 1}`))
+    requireSafeInt(row.amount_centavos, `Target ${i + 1} amount`)
+  }
+  collectUniqueIds(targetIds, 'target')
+
+  const snoozeIds: string[] = []
+  for (const [i, row] of targetSnoozes.entries()) {
+    if (!isRecord(row)) throw new BackupValidationError(`Target snooze ${i + 1} is invalid.`)
+    snoozeIds.push(requireId(row.id, `Target snooze ${i + 1}`))
+  }
+  collectUniqueIds(snoozeIds, 'target snooze')
+
+  const moveIds: string[] = []
+  for (const [i, row] of moves.entries()) {
+    if (!isRecord(row)) throw new BackupValidationError(`Move ${i + 1} is invalid.`)
+    moveIds.push(requireId(row.id, `Move ${i + 1}`))
+  }
+  collectUniqueIds(moveIds, 'move')
+
+  const settingIds: string[] = []
+  for (const [i, row] of settings.entries()) {
+    if (!isRecord(row)) throw new BackupValidationError(`Setting ${i + 1} is invalid.`)
+    settingIds.push(requireId(row.id, `Setting ${i + 1}`))
+  }
+  collectUniqueIds(settingIds, 'setting')
+}
+
+/** Validate unknown JSON as a BackupPayload without mutating storage. */
+export function parseBackupPayload(raw: unknown): BackupPayload {
+  if (!isRecord(raw)) {
+    throw new BackupValidationError('Backup file is not a JSON object.')
+  }
+  if (raw.version !== 1 && raw.version !== 2) {
+    throw new BackupValidationError('Unsupported backup version.')
+  }
+  if (typeof raw.exportedAt !== 'string' || raw.exportedAt.length === 0) {
+    throw new BackupValidationError('Backup is missing exportedAt.')
+  }
+
+  validateCoreLists(raw)
+  if (raw.version === 2) validateV2Extras(raw)
 
   return raw as unknown as BackupPayload
 }
 
 export function backupReplaceSummary(payload: BackupPayload): string {
-  return [
+  const parts = [
     `${payload.accounts.length} accounts`,
     `${payload.categories.length} categories`,
     `${payload.transactions.length} transactions`,
     `${payload.assignments.length} assignments`,
-  ].join(', ')
+  ]
+  if (payload.version === 2) {
+    parts.push(`${payload.targets.length} targets`)
+  }
+  return parts.join(', ')
 }

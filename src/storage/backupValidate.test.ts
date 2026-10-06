@@ -28,6 +28,19 @@ describe('parseBackupPayload', () => {
     expect(parseBackupPayload(base).version).toBe(1)
   })
 
+  test('accepts backup version 2 with empty milestone-a lists', () => {
+    expect(
+      parseBackupPayload({
+        ...base,
+        version: 2,
+        targets: [],
+        targetSnoozes: [],
+        moves: [],
+        settings: [],
+      }).version,
+    ).toBe(2)
+  })
+
   test('rejects missing arrays', () => {
     const rest = { ...base }
     delete (rest as { accounts?: unknown }).accounts

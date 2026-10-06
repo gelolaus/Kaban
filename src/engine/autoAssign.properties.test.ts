@@ -1,19 +1,7 @@
 import { expect, test } from 'vitest'
-import {
-  applyAssignmentDeltas,
-  autoAssignPreview,
-  moveMoneyPreview,
-} from './autoAssign.ts'
+import { applyAssignmentDeltas, autoAssignPreview, moveMoneyPreview } from './autoAssign.ts'
 import { accountBalances, computeMonth } from './compute.ts'
-import {
-  assign,
-  cash,
-  inflow,
-  normal,
-  pesos,
-  snap,
-  spend,
-} from './test-helpers.ts'
+import { assign, cash, inflow, normal, pesos, snap, spend } from './test-helpers.ts'
 import type { BudgetSnapshot, EngineTarget } from './types.ts'
 
 const CURRENT = '2026-10'

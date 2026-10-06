@@ -215,14 +215,9 @@ export function computeTargets(
       creditOverspending: 0,
     }
     const snoozed = snoozeSet.has(target.categoryId)
-    let { needed, askThisMonth } = neededForTarget(
-      target,
-      cm,
-      month,
-      currentMonth,
-      snapshot.assignments,
-    )
-    if (snoozed) needed = 0
+    const computed = neededForTarget(target, cm, month, currentMonth, snapshot.assignments)
+    const needed = snoozed ? 0 : computed.needed
+    const askThisMonth = computed.askThisMonth
     out[target.categoryId] = {
       categoryId: target.categoryId,
       needed,

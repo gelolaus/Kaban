@@ -100,7 +100,9 @@ describe('schema migrations', () => {
       const beforeAsg = await (await db.prepare(`SELECT * FROM assignment_entries`)).all()
       const beforeCats = await (await db.prepare(`SELECT * FROM categories`)).all()
 
-      expect(await (await db.prepare(`SELECT value FROM meta WHERE key = ?`)).get(SCHEMA_VERSION_KEY)).toBeUndefined()
+      expect(
+        await (await db.prepare(`SELECT value FROM meta WHERE key = ?`)).get(SCHEMA_VERSION_KEY),
+      ).toBeUndefined()
 
       await migrate(db)
 

@@ -1,21 +1,9 @@
 import { describe, expect, test } from 'vitest'
-import {
-  applyAssignmentDeltas,
-  autoAssignPreview,
-  moveMoneyPreview,
-} from './autoAssign.ts'
+import { applyAssignmentDeltas, autoAssignPreview, moveMoneyPreview } from './autoAssign.ts'
 import { computeMonth } from './compute.ts'
 import { countWeekdayInMonth } from './months.ts'
 import { canSnooze, computeTargets, costToBeMe } from './targets.ts'
-import {
-  assign,
-  cash,
-  inflow,
-  normal,
-  pesos,
-  snap,
-  spend,
-} from './test-helpers.ts'
+import { assign, cash, inflow, normal, pesos, snap, spend } from './test-helpers.ts'
 import type { BudgetSnapshot, EngineTarget } from './types.ts'
 
 const CURRENT = '2026-10'
@@ -102,10 +90,7 @@ describe('T2 monthly refill', () => {
     const funded = {
       ...s,
       assignments: [...s.assignments, assign('fun', '2026-11', pesos(3_500))],
-      transactions: [
-        ...s.transactions,
-        spend('sp2', 'wallet', '2026-11-05', 'fun', pesos(100)),
-      ],
+      transactions: [...s.transactions, spend('sp2', 'wallet', '2026-11-05', 'fun', pesos(100))],
     }
     expect(computeTargets(funded, '2026-11', '2026-11').fun?.needed).toBe(0)
     expect(computeTargets(funded, '2026-11', '2026-11').fun?.status).toBe('funded')

@@ -4,12 +4,16 @@ import type { BudgetRepository } from '../storage/repository.ts'
 import type {
   AccountRow,
   AssignmentRow,
+  BudgetSettingRow,
   CategoryGroupRow,
   CategoryRow,
   PayeeRow,
   PinRow,
+  TargetRow,
+  TargetSnoozeRow,
   TransactionRow,
 } from '../storage/types.ts'
+import type { EngineTarget } from '../engine/types.ts'
 
 export interface BudgetData {
   accounts: AccountRow[]
@@ -19,21 +23,67 @@ export interface BudgetData {
   transactions: TransactionRow[]
   assignments: AssignmentRow[]
   pins: PinRow[]
+  targets: TargetRow[]
+  snoozes: TargetSnoozeRow[]
+  settings: BudgetSettingRow[]
 }
 
 export async function loadBudgetData(repo: BudgetRepository): Promise<BudgetData> {
-  const [accounts, groups, categories, payees, transactions, assignments, pins] = await Promise.all(
-    [
-      repo.listAccounts(),
-      repo.listCategoryGroups(),
-      repo.listCategories(),
-      repo.listPayees(),
-      repo.listTransactions(),
-      repo.listAssignments(),
-      repo.listPins(),
-    ],
-  )
-  return { accounts, groups, categories, payees, transactions, assignments, pins }
+  const [
+    accounts,
+    groups,
+    categories,
+    payees,
+    transactions,
+    assignments,
+    pins,
+    targets,
+    snoozes,
+    settings,
+  ] = await Promise.all([
+    repo.listAccounts(),
+    repo.listCategoryGroups(),
+    repo.listCategories(),
+    repo.listPayees(),
+    repo.listTransactions(),
+    repo.listAssignments(),
+    repo.listPins(),
+    repo.listTargets(),
+    repo.listTargetSnoozes(),
+    repo.listSettings(),
+  ])
+  return {
+    accounts,
+    groups,
+    categories,
+    payees,
+    transactions,
+    assignments,
+    pins,
+    targets,
+    snoozes,
+    settings,
+  }
+}
+
+function rowToEngineTarget(t: TargetRow): EngineTarget {
+  let dueDay: number | 'end' | undefined
+  if (t.due_day === 'end') dueDay = 'end'
+  else if (t.due_day !== null) {
+    const n = Number(t.due_day)
+    if (Number.isInteger(n)) dueDay = n
+  }
+  return {
+    categoryId: t.category_id,
+    cadence: t.cadence,
+    behavior: t.behavior,
+    amount: t.amount_centavos,
+    weekday: t.weekday ?? undefined,
+    dueDay,
+    dueMonth: t.due_month ?? undefined,
+    repeat: t.repeat ?? undefined,
+    repeatBehavior: t.repeat_behavior ?? undefined,
+  }
 }
 
 export function toEngineSnapshot(data: BudgetData): BudgetSnapshot {
@@ -137,7 +187,14 @@ export function toEngineSnapshot(data: BudgetData): BudgetSnapshot {
     delta: a.delta_centavos,
   }))
 
-  return { accounts, categories, transactions, assignments }
+  return {
+    accounts,
+    categories,
+    transactions,
+    assignments,
+    targets: data.targets.map(rowToEngineTarget),
+    snoozes: data.snoozes.map((s) => ({ categoryId: s.category_id, month: s.month })),
+  }
 }
 
 export function monthViewFor(data: BudgetData, month: string): MonthView {

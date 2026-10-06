@@ -68,13 +68,7 @@ export interface BudgetSnapshot {
 }
 
 export type TargetStatus =
-  | 'overspent'
-  | 'credit_overspent'
-  | 'underfunded'
-  | 'funded'
-  | 'snoozed'
-  | 'positive'
-  | 'zero'
+  'overspent' | 'credit_overspent' | 'underfunded' | 'funded' | 'snoozed' | 'positive' | 'zero'
 
 export interface CategoryTargetView {
   categoryId: string

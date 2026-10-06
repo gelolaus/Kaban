@@ -6,7 +6,6 @@ import type {
   AutoAssignOption,
   AutoAssignPreview,
   BudgetSnapshot,
-  EngineCategory,
   EngineTarget,
 } from './types.ts'
 
@@ -192,7 +191,7 @@ function previewUnderfunded(
     })
 
   for (const id of [...byDue(tier2), ...byDue(tier3), ...byDue(tier4)]) {
-    let remaining = allowNegative ? Number.POSITIVE_INFINITY : Math.max(0, rta())
+    const remaining = allowNegative ? Number.POSITIVE_INFINITY : Math.max(0, rta())
     if (remaining <= 0 && !allowNegative) break
     const tv = computeTargets(working, month, currentMonth)[id]
     const need = tv?.needed ?? 0
@@ -216,11 +215,7 @@ function setAssignedTo(
   return newAssigned - current
 }
 
-function averageAssigned(
-  snapshot: BudgetSnapshot,
-  categoryId: string,
-  month: MonthKey,
-): number {
+function averageAssigned(snapshot: BudgetSnapshot, categoryId: string, month: MonthKey): number {
   const values: number[] = []
   let started = false
   for (let i = 12; i >= 1; i--) {
@@ -257,11 +252,7 @@ export function autoAssignPreview(
   scope: AutoAssignScope = {},
 ): AutoAssignPreview {
   const selected = scope.categoryIds
-  const ids =
-    selected ??
-    snapshot.categories
-      .filter((c) => !isHiddenish(c))
-      .map((c) => c.id)
+  const ids = selected ?? snapshot.categories.map((c) => c.id)
 
   if (option === 'underfunded') {
     return previewUnderfunded(snapshot, month, currentMonth, scope)
@@ -330,10 +321,6 @@ export function autoAssignPreview(
   const readyToAssignAfter = computeMonth({ ...snapshot, assignments }, month).readyToAssign
 
   return { deltas: deltas.filter((d) => d.delta !== 0), readyToAssignAfter }
-}
-
-function isHiddenish(_c: EngineCategory): boolean {
-  return false
 }
 
 /** Apply preview deltas onto a snapshot (pure). */
