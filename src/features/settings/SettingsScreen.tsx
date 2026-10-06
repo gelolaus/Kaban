@@ -99,9 +99,14 @@ export function SettingsScreen() {
   async function removeData() {
     if (!repo) return
     if (!window.confirm('Remove all Kaban data from this device?')) return
-    await repo.clearAllData()
-    showToast('Data removed from this device.')
-    window.location.reload()
+    try {
+      await repo.clearAllData()
+      showToast('Data removed from this device.')
+    } catch (err) {
+      showToast(plainError(err), { kind: 'error' })
+      return
+    }
+    window.location.assign('/')
   }
 
   return (
