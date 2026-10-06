@@ -60,3 +60,34 @@ export function monthRange(from: MonthKey, to: MonthKey): MonthKey[] {
   }
   return out
 }
+
+function daysInMonth(year: number, month: number): number {
+  if (month === 2 && isLeapYear(year)) return 29
+  return DAYS_IN_MONTH[month - 1]!
+}
+
+/** Weekday: 0 = Sunday … 6 = Saturday. */
+export function countWeekdayInMonth(month: MonthKey, weekday: number): number {
+  if (!isMonthKey(month)) throw new RangeError(`invalid MonthKey: ${month}`)
+  if (!Number.isInteger(weekday) || weekday < 0 || weekday > 6) {
+    throw new RangeError(`weekday must be 0..6: ${weekday}`)
+  }
+  const year = Number(month.slice(0, 4))
+  const mon = Number(month.slice(5, 7))
+  const dim = daysInMonth(year, mon)
+  // Date.UTC day-of-week: 0 Sunday
+  let count = 0
+  for (let day = 1; day <= dim; day++) {
+    if (new Date(Date.UTC(year, mon - 1, day)).getUTCDay() === weekday) count++
+  }
+  return count
+}
+
+/** Inclusive months from `from` through `dueMonth`. */
+export function monthsLeftThrough(from: MonthKey, dueMonth: MonthKey): number {
+  if (!isMonthKey(from) || !isMonthKey(dueMonth)) {
+    throw new RangeError(`invalid MonthKey in monthsLeftThrough: ${from}..${dueMonth}`)
+  }
+  if (compareMonths(from, dueMonth) > 0) return 0
+  return monthRange(from, dueMonth).length
+}

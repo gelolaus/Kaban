@@ -88,5 +88,11 @@ export function snap(parts: Partial<BudgetSnapshot>): BudgetSnapshot {
     categories: parts.categories ?? [],
     transactions: parts.transactions ?? [],
     assignments: parts.assignments ?? [],
+    targets: parts.targets,
+    snoozes: parts.snoozes,
   }
+}
+
+export function pesos(n: number): number {
+  return Math.round(n * 100)
 }

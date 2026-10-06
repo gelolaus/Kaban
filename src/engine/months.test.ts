@@ -1,5 +1,13 @@
 import { describe, expect, test } from 'vitest'
-import { addMonths, compareMonths, isMonthKey, monthOfDate, monthRange } from './months.ts'
+import {
+  addMonths,
+  compareMonths,
+  countWeekdayInMonth,
+  isMonthKey,
+  monthOfDate,
+  monthRange,
+  monthsLeftThrough,
+} from './months.ts'
 
 describe('monthOfDate', () => {
   test('maps month boundaries', () => {
@@ -59,5 +67,21 @@ describe('monthRange', () => {
 
   test('empty when from is after to', () => {
     expect(monthRange('2026-11', '2026-10')).toEqual([])
+  })
+})
+
+describe('countWeekdayInMonth', () => {
+  test('October 2026 has five Saturdays', () => {
+    expect(countWeekdayInMonth('2026-10', 6)).toBe(5)
+  })
+})
+
+describe('monthsLeftThrough', () => {
+  test('inclusive months from October through March', () => {
+    expect(monthsLeftThrough('2026-10', '2027-03')).toBe(6)
+  })
+
+  test('zero when from is after due', () => {
+    expect(monthsLeftThrough('2027-10', '2027-09')).toBe(0)
   })
 })
