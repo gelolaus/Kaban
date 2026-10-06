@@ -30,10 +30,10 @@ test('G1 to G4 golden budget flow', async ({ page }) => {
   // G2: assign 3000 groceries, 1000 dining
   const groc = page.getByRole('button', { name: 'Groceries' })
   await groc.click()
-  await page.getByLabel('Assign').fill('3000')
+  await page.getByRole('textbox', { name: 'Assign' }).fill('3000')
   await page.getByRole('button', { name: 'Save assignment' }).click()
   await page.getByRole('button', { name: 'Dining out' }).click()
-  await page.getByLabel('Assign').fill('1000')
+  await page.getByRole('textbox', { name: 'Assign' }).fill('1000')
   await page.getByRole('button', { name: 'Save assignment' }).click()
   await expect(page.getByTestId('ready-to-assign')).toContainText('₱6,000.00')
 

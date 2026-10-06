@@ -60,7 +60,7 @@ test('create monthly target, see needed text, snooze, and set current goal', asy
   await inspector.getByRole('button', { name: 'Unsnooze' }).click()
   await inspector.getByRole('button', { name: 'Set as current goal' }).click()
 
-  await page.goto('/')
+  await page.goto('/home')
   await expect(page.getByRole('progressbar')).toBeVisible()
   await expect(page.getByText('Complete')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Adjust' })).toBeVisible()
@@ -97,10 +97,10 @@ test('Auto-Assign preview, Undo Redo by button and key, Move Money, Recent Moves
   await expect(page.getByRole('button', { name: 'Undo' })).toBeEnabled()
 
   await selectCategory(page, 'Groceries')
-  await inspector.getByLabel('Assign').fill('800')
+  await inspector.getByRole('textbox', { name: 'Assign' }).fill('800')
   await inspector.getByRole('button', { name: 'Save assignment' }).click()
 
-  await page.getByRole('button', { name: 'Move Money' }).click()
+  await page.getByRole('button', { name: 'Move money' }).click()
   const move = page.getByRole('dialog', { name: 'Move money' })
   await expect(move).toBeVisible()
   await move.getByLabel('From').selectOption({ label: 'Groceries' })
