@@ -16,7 +16,7 @@ export default defineConfig({
       testMatch: /^(?!.*preview).*\.spec\.ts$/,
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: 'http://localhost:5173',
+        baseURL: 'http://127.0.0.1:5173',
       },
     },
     {
@@ -24,28 +24,28 @@ export default defineConfig({
       testMatch: /.*\.preview\.spec\.ts/,
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: 'http://localhost:4173',
+        baseURL: 'http://127.0.0.1:4173',
       },
     },
   ],
   webServer: isPreviewOnly
     ? {
         command: 'pnpm build && pnpm preview',
-        url: 'http://localhost:4173',
+        url: 'http://127.0.0.1:4173',
         reuseExistingServer: true,
         timeout: 180_000,
       }
     : [
         {
           command: 'pnpm dev',
-          url: 'http://localhost:5173',
+          url: 'http://127.0.0.1:5173',
           reuseExistingServer: true,
           timeout: 120_000,
         },
         {
           // dist/ is produced by `pnpm verify` before `pnpm test:e2e`
           command: 'pnpm preview',
-          url: 'http://localhost:4173',
+          url: 'http://127.0.0.1:4173',
           reuseExistingServer: true,
           timeout: 120_000,
         },
