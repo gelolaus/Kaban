@@ -230,8 +230,11 @@ test('remove data from this device', async ({ page }) => {
   await addAccount(page, 'Doomed', 'Checking', '50')
   await page.goto('/settings')
   page.once('dialog', (d) => d.accept())
-  await page.getByRole('button', { name: 'Remove data from this device' }).click()
+  await Promise.all([
+    page.waitForURL(/\/(settings|plan|home)/, { timeout: 60_000 }),
+    page.getByRole('button', { name: 'Remove data from this device' }).click(),
+  ])
   await expect(page.getByRole('heading', { level: 1 }).first()).toBeVisible({ timeout: 60_000 })
-  await page.goto('/accounts')
+  await page.goto('/accounts', { waitUntil: 'domcontentloaded' })
   await expect(page.locator('.account-list').getByText('Doomed')).toHaveCount(0)
 })
