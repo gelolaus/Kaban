@@ -29,7 +29,7 @@ interface BudgetContextValue {
 
 const BudgetContext = createContext<BudgetContextValue | null>(null)
 
-function currentMonthKey(): string {
+export function currentMonthKey(): string {
   const t = temporal()
   const today = t.Now.plainDateISO()
   return isoMonth(t.PlainYearMonth.from({ year: today.year, month: today.month }))
