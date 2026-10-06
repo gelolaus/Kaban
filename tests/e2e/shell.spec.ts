@@ -23,6 +23,7 @@ test('tablet rail', async ({ page }) => {
   const mainNav = page.getByRole('navigation', { name: 'Main' })
   await expect(mainNav).toBeVisible()
   await expect(mainNav.getByRole('link', { name: 'Plan' })).toBeVisible()
+  await expect(mainNav.getByRole('button', { name: 'Transaction' })).toBeVisible()
   await expect(page.getByRole('complementary', { name: 'Inspector' })).toBeHidden()
   await expect(page.getByRole('navigation', { name: 'Tabs' })).toBeHidden()
 })

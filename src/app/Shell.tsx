@@ -56,7 +56,12 @@ function ShellChrome({
           </NavLink>
         ))}
         {showTx ? (
-          <button type="button" className="shell-tx-desk" onClick={() => setTxOpen(true)}>
+          <button
+            type="button"
+            className="shell-tx-desk"
+            aria-label="Transaction"
+            onClick={() => setTxOpen(true)}
+          >
             <Plus size={18} strokeWidth={1.5} aria-hidden />
             <span className="shell-nav-label">Transaction</span>
           </button>
