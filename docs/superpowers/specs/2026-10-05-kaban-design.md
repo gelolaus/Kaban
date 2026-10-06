@@ -61,7 +61,7 @@ src/
   app/       Shell, routing, PWA registration.
 ```
 
-**Data flow.** A user action becomes a validated command. The command writes through a repository. A live query feeds the engine, which derives the month view, and the UI renders it. Undo and redo replay inverse commands from a command log.
+**Data flow.** A user action becomes a validated command. The command writes through a repository. A live query feeds the engine, which derives the month view, and the UI renders it. Undo and redo cover assigning, money moves and Auto-Assign (as in YNAB). Each is one `moves` record that undo soft-deletes and redo restores (see `docs/superpowers/specs/2026-10-06-ynab-targets-autoassign-rules.md` section 4).
 
 **Rules.**
 - Money is integer centavos everywhere. There are no floats. Entered text is parsed to centavos with string logic, never `parseFloat`. One function formats the peso sign and separators (`Intl.NumberFormat`, with the true minus sign).
@@ -95,7 +95,9 @@ All records carry `id` (ULID), `created_at`, `updated_at`, `deleted_at`.
 | ScheduledTransaction | transaction template, frequency, next_date, auto_enter |
 | MonthNote | month, text |
 | Pin | category_id, sort_order (the Home tab's pinned categories) |
-| CommandLog | command, inverse, timestamp (local only, for undo and redo) |
+| Move | kind (`assign`, `move`, `auto_assign`, `cover`, `delete_category`), month, undone_at; groups the assignment entries of one action for Recent Moves, Undo and Redo |
+| Target | category_id, cadence, behavior, amount, weekday, due_day, due_month, repeat, repeat_behavior (one per category) |
+| TargetSnooze | category_id, month |
 
 **Account types** (verified in YNAB): cash accounts (Checking, Savings, Cash); credit accounts (Credit Card, Line of Credit); loans (Mortgage, Auto Loan, Student Loan, Personal Loan, Medical Debt, Other Debt); tracking accounts (Asset, Liability). Tracking accounts are off budget.
 
@@ -279,6 +281,18 @@ Each plan is its own file in `docs/superpowers/plans/`, written for Grok 4.7 Hig
 | 7 | Import and export: CSV, OFX, QIF, and a YNAB export import. |
 | 8 | Sync and PWA polish: pairing, install prompt, shortcuts, onboarding. Sync work may move earlier depending on Plan 0. |
 
+### 8.1 Roadmap to the full YNAB app (revised 2026-10-06)
+
+The owner chose to finish the full YNAB feature set before any sync work. Backup export (JSON) stays the only data safety net until the owner asks for the main backup and sync feature. Plans 0 to 2 and the Wantap re-skin are done. The remaining plans are grouped into four milestones. Each milestone is built from one brief in `docs/superpowers/plans/`, backed by a rules file in `docs/superpowers/specs/` that records YNAB's behavior with the same verified, documented and assumed labels.
+
+| Milestone | Covers | Replaces plans |
+|---|---|---|
+| A | Targets (all types), snooze, Cost to Be Me, Auto-Assign, Move Money, cover overspending, Undo, Redo, Recent Moves, Plan filters and selection, Inspector, Home tab (pinned, current goal), versioned database migrations, backup format v2 | 3 |
+| B | Credit cards and loans (payment categories on screen, card register chips, payoff targets, paired loan categories, the credit card tier of Underfunded), tracking accounts, splits, transfers, scheduled transactions (with their tier in Underfunded), flags, cleared and reconciled, payee memory, balance adjustments | 4, 5 |
+| C | Reflect: spending breakdown, income vs spending, net worth, Age of Money, with filters | 6 |
+| D | Import (CSV, OFX, QIF, YNAB plan export), command palette and shortcuts, onboarding, install prompt, polish | 7, 8 (without sync) |
+| Later | Sync and the main backup feature, started only when the owner says so | 8 |
+
 **Plan 0 spike pass criteria** (all in a throwaway PWA, on the user's laptop and phone):
 1. Turso's browser sync package opens a database persisted in OPFS.
 2. A write made offline in the browser survives a reload and a killed tab.
@@ -310,4 +324,5 @@ Bank linking or any automatic bank import. Multi-user accounts, sharing and publ
 - **Mock refresh:** `docs/design/kaban-mock.html` and `kaban-devices.html` still show the Nothing look. Either re-skin them to section 6 or retire them once the app itself is the reference.
 - **Turso Sync:** general-availability status and exact browser requirements will be confirmed by Plan 0 against Turso's current documentation.
 - **YNAB rules and features not yet verified:** R6 to R9, Auto-Assign, Reflect, scheduled transactions, splits and reconcile. These are verified per phase.
+- **Milestone A assumptions:** the multi-month target formulas for yearly and custom targets, the Auto-Assign rounding, the tier 1 Underfunded amount and the Undo scope on web are assumed. They are listed with a verification protocol in `docs/superpowers/specs/2026-10-06-ynab-targets-autoassign-rules.md` section 6.
 - **modern-web-guidance in Cursor (optional):** the project publishes Cursor and Grok plugin packages. If the owner installs it in Cursor, Grok can run the CLI for the full guides. The distilled rules in `docs/guidance/modern-web.md` work without it.
