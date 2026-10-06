@@ -1,3 +1,9 @@
+@property --value {
+  syntax: '<number>';
+  inherits: true;
+  initial-value: 0;
+}
+
 @layer components {
   .screen-stack {
     display: flex;
@@ -123,5 +129,95 @@
   .empty-state {
     color: var(--ink-2);
     margin: 0;
+  }
+
+  .settings-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-block-size: var(--control-h);
+  }
+
+  .goal-card {
+    display: grid;
+    gap: var(--space-3);
+    justify-items: start;
+  }
+
+  .goal-ring-wrap {
+    position: relative;
+    inline-size: 8rem;
+    block-size: 8rem;
+  }
+
+  .goal-ring {
+    inline-size: 100%;
+    block-size: 100%;
+    appearance: none;
+    border: 0.6rem solid transparent;
+    border-radius: 50%;
+    background: conic-gradient(var(--ink) calc(var(--value) * 1%), var(--track) 0);
+    background-clip: border-area;
+    color: transparent;
+  }
+
+  .goal-ring::-webkit-progress-bar,
+  .goal-ring::-webkit-progress-value,
+  .goal-ring::-moz-progress-bar {
+    background: transparent;
+  }
+
+  .goal-ring-label {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    pointer-events: none;
+  }
+
+  .goal-ring-pct {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: var(--fs-title);
+    letter-spacing: -0.02em;
+  }
+
+  .goal-name {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .goal-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    margin: 0;
+    width: 100%;
+  }
+
+  .goal-stats dt {
+    color: var(--ink-2);
+    font-size: var(--fs-caption);
+  }
+
+  .goal-stats dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  @supports not (background-clip: border-area) {
+    .goal-ring {
+      background:
+        radial-gradient(closest-side, var(--surface) 70%, transparent 71% 100%),
+        conic-gradient(var(--ink) calc(var(--value) * 1%), var(--track) 0);
+      border: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .goal-ring {
+      transition: --value 0.4s var(--ease);
+    }
   }
 }

@@ -31,11 +31,17 @@ function plainError(err: unknown): string {
 }
 
 export function SettingsScreen() {
-  const { repo, refresh } = useBudget()
+  const { repo, refresh, data } = useBudget()
   const [pref, setPref] = useState<ThemePref>(() => readThemePref(localStorage))
   const [density, setDensity] = useState<Density>(() => readDensity(localStorage))
   const systemIsDark =
     typeof window !== 'undefined' && window.matchMedia('(prefers-color-scheme: dark)').matches
+
+  const progressBarsOn = data?.settings.find((s) => s.key === 'progress_bars')?.value === '1'
+  const progressBarsExplicit = data?.settings.some((s) => s.key === 'progress_bars') ?? false
+  const phoneDefault =
+    typeof window !== 'undefined' && window.matchMedia('(max-width: 760px)').matches
+  const progressBarsChecked = progressBarsExplicit ? progressBarsOn : phoneDefault
 
   async function exportBackup() {
     if (!repo) return
@@ -141,6 +147,26 @@ export function SettingsScreen() {
           Comfortable
         </label>
       </fieldset>
+      <section className="settings-section">
+        <h2>Plan</h2>
+        <label className="settings-toggle">
+          <input
+            type="checkbox"
+            checked={progressBarsChecked}
+            onChange={(e) => {
+              void (async () => {
+                if (!repo) return
+                await repo.setSetting('progress_bars', e.target.checked ? '1' : '0')
+                await refresh()
+              })()
+            }}
+          />
+          Show progress bars on Plan
+        </label>
+        <p className="ink-2">
+          Default is on for phones and off for larger screens until you choose.
+        </p>
+      </section>
       <section className="settings-section">
         <h2>Backup</h2>
         <Button onClick={() => void exportBackup()}>Export backup</Button>
